@@ -1,0 +1,1507 @@
+{
+  "profiles": [
+    {
+      "id": "u-admin-1",
+      "name": "Dr. Sarah Jenkins",
+      "email": "admin@astrix.edu",
+      "role": "admin",
+      "avatar_url": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120",
+      "phone": "+1 (555) 010-0001",
+      "address": "100 University Drive, Campus Center, Suite 401",
+      "emergency_contact": "Jane Jenkins: +1 (555) 010-0002"
+    },
+    {
+      "id": "u-faculty-cse-hod",
+      "name": "Dr. Alan Turing",
+      "email": "turing@astrix.edu",
+      "role": "faculty",
+      "avatar_url": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=120",
+      "phone": "+1 (555) 010-0010",
+      "address": "Block A, Faculty Cabins, Room A-301",
+      "emergency_contact": "Mary Turing: +1 (555) 010-0011"
+    },
+    {
+      "id": "u-faculty-aiml",
+      "name": "Prof. Grace Hopper",
+      "email": "hopper@astrix.edu",
+      "role": "faculty",
+      "avatar_url": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=120",
+      "phone": "+1 (555) 010-0020",
+      "address": "Block B, Faculty Cabins, Room B-205",
+      "emergency_contact": "John Hopper: +1 (555) 010-0021"
+    },
+    {
+      "id": "u-faculty-ece",
+      "name": "Dr. Nikola Tesla",
+      "email": "tesla@astrix.edu",
+      "role": "faculty",
+      "avatar_url": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120",
+      "phone": "+1 (555) 010-0030",
+      "address": "Block E, Faculty Cabins, Room E-112",
+      "emergency_contact": "Luka Tesla: +1 (555) 010-0031"
+    },
+    {
+      "id": "u-student-1",
+      "name": "John Doe",
+      "email": "john.doe@astrix.edu",
+      "role": "student",
+      "avatar_url": "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=120",
+      "phone": "+1 (555) 010-0101",
+      "address": "Boys Hostel, Block C, Room 304",
+      "emergency_contact": "Richard Doe (Father): +1 (555) 010-0102"
+    },
+    {
+      "id": "u-student-2",
+      "name": "Jane Smith",
+      "email": "jane.smith@astrix.edu",
+      "role": "student",
+      "avatar_url": "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=120",
+      "phone": "+1 (555) 010-0201",
+      "address": "Girls Hostel, Block B, Room 102",
+      "emergency_contact": "Helen Smith (Mother): +1 (555) 010-0202"
+    },
+    {
+      "id": "u-student-3",
+      "name": "Alex Rivera",
+      "email": "alex.rivera@astrix.edu",
+      "role": "student",
+      "avatar_url": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=120",
+      "phone": "+1 (555) 010-0301",
+      "address": "452 Maple Street, Apt 3B, Metro City",
+      "emergency_contact": "Carlos Rivera (Brother): +1 (555) 010-0302"
+    },
+    {
+      "id": "u-parent-1",
+      "name": "Richard Doe",
+      "email": "richard.doe@gmail.com",
+      "role": "parent",
+      "avatar_url": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=120",
+      "phone": "+1 (555) 010-0102",
+      "address": "128 Pine Ridge Dr, Metro City",
+      "emergency_contact": "John Doe: +1 (555) 010-0101"
+    },
+    {
+      "id": "rec-lyjjwvm5r",
+      "created_at": "2026-06-08T19:43:28.661Z",
+      "name": "Lana",
+      "email": "lana@gmail.com",
+      "role": "student",
+      "phone": "9999988888",
+      "address": "Astrix University",
+      "emergency_contact": "8888899999",
+      "updated_at": "2026-06-09T14:44:57.712Z"
+    },
+    {
+      "id": "rec-ma7xgb1cp",
+      "created_at": "2026-06-09T16:30:48.087Z",
+      "name": "Rohini",
+      "email": "rohini@gmail.com",
+      "role": "student"
+    },
+    {
+      "id": "rec-aza9hxu3x",
+      "created_at": "2026-06-09T16:31:11.470Z",
+      "name": "bhargavi",
+      "email": "bhargavi@gmail.com",
+      "role": "student"
+    }
+  ],
+  "departments": [
+    {
+      "id": "d-cse",
+      "name": "Computer Science and Engineering",
+      "code": "CSE",
+      "description": "Department of Computer Science & Engineering",
+      "hod_id": "u-faculty-cse-hod",
+      "updated_at": "2026-06-08T19:28:47.948Z"
+    },
+    {
+      "id": "d-aiml",
+      "name": "Artificial Intelligence and Machine Learning",
+      "code": "AIML",
+      "description": "Department of AI & Machine Learning",
+      "hod_id": "u-faculty-aiml",
+      "updated_at": "2026-06-14T17:32:39.465Z"
+    },
+    {
+      "id": "d-csbs",
+      "name": "Computer Science and Business Systems",
+      "code": "CSBS",
+      "description": "Department of CS & Business Systems"
+    },
+    {
+      "id": "d-aids",
+      "name": "Artificial Intelligence and Data Science",
+      "code": "AIDS",
+      "description": "Department of AI & Data Science"
+    },
+    {
+      "id": "d-ece",
+      "name": "Electronics and Communication Engineering",
+      "code": "ECE",
+      "description": "Department of Electronics & Communication Engineering",
+      "hod_id": "u-faculty-ece",
+      "updated_at": "2026-06-09T16:34:27.628Z"
+    },
+    {
+      "id": "d-eee",
+      "name": "Electrical and Electronics Engineering",
+      "code": "EEE",
+      "description": "Department of Electrical & Electronics Engineering"
+    },
+    {
+      "id": "d-mech",
+      "name": "Mechanical Engineering",
+      "code": "MECH",
+      "description": "Department of Mechanical Engineering"
+    },
+    {
+      "id": "d-civil",
+      "name": "Civil Engineering",
+      "code": "CIVIL",
+      "description": "Department of Civil Engineering"
+    },
+    {
+      "id": "d-bme",
+      "name": "Biomedical Engineering",
+      "code": "BME",
+      "description": "Department of Biomedical Engineering"
+    },
+    {
+      "id": "d-mba",
+      "name": "Master of Business Administration",
+      "code": "MBA",
+      "description": "Department of Management Studies"
+    }
+  ],
+  "students": [
+    {
+      "profile_id": "u-student-1",
+      "register_number": "2023CSE1024",
+      "department_id": "d-cse",
+      "year": 3,
+      "semester": 5,
+      "cgpa": 8.74
+    },
+    {
+      "profile_id": "u-student-2",
+      "register_number": "2024AIML2056",
+      "department_id": "d-aiml",
+      "year": 2,
+      "semester": 3,
+      "cgpa": 9.12
+    },
+    {
+      "profile_id": "u-student-3",
+      "register_number": "2023CSE1088",
+      "department_id": "d-cse",
+      "year": 3,
+      "semester": 5,
+      "cgpa": 7.92
+    },
+    {
+      "id": "rec-pxafsjuea",
+      "created_at": "2026-06-08T19:43:28.782Z",
+      "profile_id": "rec-lyjjwvm5r",
+      "register_number": "REG968936",
+      "department_id": "d-cse",
+      "year": 1,
+      "semester": 1,
+      "cgpa": 0
+    },
+    {
+      "id": "rec-7mlxxbvu2",
+      "created_at": "2026-06-09T16:30:48.176Z",
+      "profile_id": "rec-ma7xgb1cp",
+      "register_number": "REG572121",
+      "department_id": "d-cse",
+      "year": 1,
+      "semester": 1,
+      "cgpa": 0
+    },
+    {
+      "id": "rec-fyieooene",
+      "created_at": "2026-06-09T16:31:11.526Z",
+      "profile_id": "rec-aza9hxu3x",
+      "register_number": "REG915135",
+      "department_id": "d-cse",
+      "year": 1,
+      "semester": 1,
+      "cgpa": 0
+    }
+  ],
+  "faculty": [
+    {
+      "profile_id": "u-faculty-cse-hod",
+      "faculty_id": "FAC-CSE-001",
+      "department_id": "d-cse",
+      "designation": "Professor & HOD"
+    },
+    {
+      "profile_id": "u-faculty-aiml",
+      "faculty_id": "FAC-AIML-003",
+      "department_id": "d-aiml",
+      "designation": "Associate Professor"
+    },
+    {
+      "profile_id": "u-faculty-ece",
+      "faculty_id": "FAC-ECE-012",
+      "department_id": "d-ece",
+      "designation": "Professor"
+    }
+  ],
+  "parents": [
+    {
+      "profile_id": "u-parent-1",
+      "student_id": "u-student-1",
+      "relation": "Father"
+    }
+  ],
+  "courses": [
+    {
+      "id": "c-cse-core",
+      "code": "CS301",
+      "name": "B.E. Computer Science and Engineering",
+      "credits": 4,
+      "department_id": "d-cse"
+    },
+    {
+      "id": "c-aiml-core",
+      "code": "AI201",
+      "name": "B.Tech Artificial Intelligence & Machine Learning",
+      "credits": 4,
+      "department_id": "d-aiml"
+    }
+  ],
+  "subjects": [
+    {
+      "id": "s-dbms",
+      "name": "Database Management Systems",
+      "code": "CS301-DBMS",
+      "course_id": "c-cse-core",
+      "faculty_id": "u-faculty-cse-hod",
+      "semester_id": "sem-active"
+    },
+    {
+      "id": "s-os",
+      "name": "Operating Systems",
+      "code": "CS302-OS",
+      "course_id": "c-cse-core",
+      "faculty_id": "u-faculty-cse-hod",
+      "semester_id": "sem-active"
+    },
+    {
+      "id": "s-ml",
+      "name": "Machine Learning Foundations",
+      "code": "AI201-ML",
+      "course_id": "c-aiml-core",
+      "faculty_id": "u-faculty-aiml",
+      "semester_id": "sem-active"
+    },
+    {
+      "id": "s-dsp",
+      "name": "Digital Signal Processing",
+      "code": "EC402-DSP",
+      "course_id": "c-cse-core",
+      "faculty_id": "u-faculty-ece",
+      "semester_id": "sem-active"
+    }
+  ],
+  "attendance": [
+    {
+      "id": "att-1",
+      "student_id": "u-student-1",
+      "subject_id": "s-dbms",
+      "date": "2026-06-08",
+      "status": "Present",
+      "qr_scanned": true,
+      "marked_by": "u-faculty-cse-hod"
+    },
+    {
+      "id": "att-2",
+      "student_id": "u-student-1",
+      "subject_id": "s-os",
+      "date": "2026-06-08",
+      "status": "Present",
+      "qr_scanned": false,
+      "marked_by": "u-faculty-cse-hod"
+    },
+    {
+      "id": "att-3",
+      "student_id": "u-student-2",
+      "subject_id": "s-ml",
+      "date": "2026-06-08",
+      "status": "Present",
+      "qr_scanned": true,
+      "marked_by": "u-faculty-aiml"
+    },
+    {
+      "id": "att-4",
+      "student_id": "u-student-3",
+      "subject_id": "s-dbms",
+      "date": "2026-06-08",
+      "status": "Absent",
+      "qr_scanned": false,
+      "marked_by": "u-faculty-cse-hod"
+    },
+    {
+      "id": "att-5",
+      "student_id": "u-student-1",
+      "subject_id": "s-dbms",
+      "date": "2026-06-07",
+      "status": "Present",
+      "qr_scanned": true,
+      "marked_by": "u-faculty-cse-hod"
+    },
+    {
+      "id": "att-6",
+      "student_id": "u-student-1",
+      "subject_id": "s-os",
+      "date": "2026-06-07",
+      "status": "Present",
+      "qr_scanned": false,
+      "marked_by": "u-faculty-cse-hod"
+    },
+    {
+      "id": "att-7",
+      "student_id": "u-student-3",
+      "subject_id": "s-dbms",
+      "date": "2026-06-07",
+      "status": "Late",
+      "qr_scanned": false,
+      "marked_by": "u-faculty-cse-hod"
+    }
+  ],
+  "exams": [
+    {
+      "id": "exam-int-1",
+      "name": "Internal Assessment 1",
+      "type": "Internal-1",
+      "date": "2026-04-15",
+      "max_marks": 50
+    },
+    {
+      "id": "exam-int-2",
+      "name": "Internal Assessment 2",
+      "type": "Internal-2",
+      "date": "2026-05-20",
+      "max_marks": 50
+    }
+  ],
+  "results": [
+    {
+      "id": "res-1",
+      "student_id": "u-student-1",
+      "exam_id": "exam-int-1",
+      "subject_id": "s-dbms",
+      "marks_obtained": 44,
+      "grade": "A+"
+    },
+    {
+      "id": "res-2",
+      "student_id": "u-student-1",
+      "exam_id": "exam-int-1",
+      "subject_id": "s-os",
+      "marks_obtained": 38,
+      "grade": "B+"
+    },
+    {
+      "id": "res-3",
+      "student_id": "u-student-2",
+      "exam_id": "exam-int-1",
+      "subject_id": "s-ml",
+      "marks_obtained": 48,
+      "grade": "O"
+    },
+    {
+      "id": "res-4",
+      "student_id": "u-student-3",
+      "exam_id": "exam-int-1",
+      "subject_id": "s-dbms",
+      "marks_obtained": 32,
+      "grade": "B"
+    },
+    {
+      "id": "rec-y4u6kwypl",
+      "created_at": "2026-06-08T18:17:50.223Z",
+      "student_id": "u-student-2",
+      "subject_id": "s-dbms",
+      "exam_id": "exam-int-1",
+      "marks_obtained": 80,
+      "grade": "A+"
+    },
+    {
+      "id": "rec-h77b6vfy6",
+      "created_at": "2026-06-08T19:27:51.902Z",
+      "student_id": "u-student-1",
+      "subject_id": "s-os",
+      "exam_id": "exam-int-1",
+      "marks_obtained": 89,
+      "grade": "A+"
+    },
+    {
+      "id": "rec-mgzttzzbk",
+      "created_at": "2026-06-09T16:24:27.156Z",
+      "student_id": "rec-lyjjwvm5r",
+      "subject_id": "s-ml",
+      "exam_id": "exam-int-1",
+      "marks_obtained": 88,
+      "grade": "A+"
+    },
+    {
+      "id": "rec-tfakvkxfj",
+      "created_at": "2026-06-14T15:16:07.603Z",
+      "student_id": "u-student-1",
+      "subject_id": "s-os",
+      "exam_id": "exam-int-1",
+      "marks_obtained": 85,
+      "grade": "A+"
+    },
+    {
+      "id": "rec-6armlp040",
+      "created_at": "2026-06-14T15:30:44.079Z",
+      "student_id": "rec-lyjjwvm5r",
+      "subject_id": "s-dsp",
+      "exam_id": "exam-int-1",
+      "marks_obtained": 90,
+      "grade": "O"
+    },
+    {
+      "id": "rec-5cb2xpw4x",
+      "created_at": "2026-06-14T16:57:14.731Z",
+      "student_id": "rec-lyjjwvm5r",
+      "subject_id": "s-ml",
+      "exam_id": "exam-int-1",
+      "marks_obtained": 90,
+      "grade": "O"
+    },
+    {
+      "id": "rec-pa76yc52r",
+      "created_at": "2026-06-14T17:09:30.450Z",
+      "student_id": "u-student-2",
+      "subject_id": "s-dsp",
+      "exam_id": "exam-int-1",
+      "marks_obtained": 98,
+      "grade": "O"
+    },
+    {
+      "id": "rec-k6shs9xpi",
+      "created_at": "2026-06-14T17:30:28.786Z",
+      "student_id": "u-student-2",
+      "subject_id": "s-ml",
+      "exam_id": "exam-int-1",
+      "marks_obtained": 87,
+      "grade": "A+"
+    }
+  ],
+  "fees": [
+    {
+      "id": "fee-tuition-1",
+      "student_id": "u-student-1",
+      "title": "Tuition Fee - Semester 5",
+      "amount": 85000,
+      "due_date": "2026-07-01",
+      "status": "Paid",
+      "updated_at": "2026-06-08T18:18:46.183Z"
+    },
+    {
+      "id": "fee-hostel-1",
+      "student_id": "u-student-1",
+      "title": "Hostel Rent - Annual",
+      "amount": 45000,
+      "due_date": "2026-05-15",
+      "status": "Paid"
+    },
+    {
+      "id": "fee-exam-1",
+      "student_id": "u-student-1",
+      "title": "Semester Exam Registration",
+      "amount": 3200,
+      "due_date": "2026-06-15",
+      "status": "Paid",
+      "updated_at": "2026-06-09T04:46:28.131Z"
+    },
+    {
+      "id": "fee-tuition-2",
+      "student_id": "u-student-2",
+      "title": "Tuition Fee - Semester 3",
+      "amount": 90000,
+      "due_date": "2026-07-01",
+      "status": "Pending"
+    }
+  ],
+  "payments": [
+    {
+      "id": "pay-1",
+      "fee_id": "fee-hostel-1",
+      "amount": 45000,
+      "payment_method": "Net Banking",
+      "transaction_id": "TXN8492019482",
+      "paid_at": "2026-05-10T11:24:00Z"
+    }
+  ],
+  "leave_requests": [
+    {
+      "id": "leave-1",
+      "student_id": "u-student-1",
+      "leave_type": "Medical Leave",
+      "start_date": "2026-06-10",
+      "end_date": "2026-06-12",
+      "reason": "Viral fever, advised bed rest by physician.",
+      "status": "Approved",
+      "requested_at": "2026-06-08T09:15:00Z",
+      "approved_by": "u-faculty-cse-hod",
+      "updated_at": "2026-06-08T19:28:03.147Z"
+    },
+    {
+      "id": "leave-2",
+      "student_id": "u-student-2",
+      "leave_type": "Event Leave",
+      "start_date": "2026-05-12",
+      "end_date": "2026-05-14",
+      "reason": "Representing college in National Level Hackathon.",
+      "status": "Approved",
+      "approved_by": "u-faculty-aiml",
+      "requested_at": "2026-05-09T14:30:00Z"
+    },
+    {
+      "id": "rec-wwozq00kb",
+      "created_at": "2026-06-14T15:12:14.330Z",
+      "student_id": "rec-lyjjwvm5r",
+      "leave_type": "On Duty Leave",
+      "start_date": "2026-06-15",
+      "end_date": "2026-06-16",
+      "reason": "Hackathon",
+      "status": "Approved",
+      "approved_by": "u-faculty-cse-hod",
+      "updated_at": "2026-06-14T17:30:52.514Z"
+    },
+    {
+      "id": "rec-crvudrm49",
+      "created_at": "2026-06-14T15:26:37.041Z",
+      "student_id": "rec-lyjjwvm5r",
+      "leave_type": "Medical Leave",
+      "start_date": "2026-06-18",
+      "end_date": "2026-06-29",
+      "reason": "fever",
+      "status": "Approved",
+      "approved_by": "u-faculty-cse-hod",
+      "updated_at": "2026-06-14T15:31:10.144Z"
+    }
+  ],
+  "certificate_requests": [
+    {
+      "id": "cert-req-1",
+      "student_id": "u-student-1",
+      "certificate_type": "Bonafide Certificate",
+      "status": "Approved",
+      "requested_at": "2026-06-08T10:45:00Z",
+      "approved_by": "u-faculty-cse-hod",
+      "document_url": "/documents/approved_certificate.pdf",
+      "updated_at": "2026-06-08T18:18:16.051Z"
+    },
+    {
+      "id": "cert-req-2",
+      "student_id": "u-student-2",
+      "certificate_type": "Study Certificate",
+      "status": "Approved",
+      "approved_by": "u-admin-1",
+      "document_url": "/documents/study_cert_jane.pdf",
+      "requested_at": "2026-05-20T11:00:00Z"
+    },
+    {
+      "id": "rec-yfnp5tcn4",
+      "created_at": "2026-06-14T15:26:46.878Z",
+      "student_id": "rec-lyjjwvm5r",
+      "certificate_type": "Fee Receipt",
+      "status": "Approved",
+      "approved_by": "u-faculty-cse-hod",
+      "document_url": "/documents/approved_certificate.pdf",
+      "updated_at": "2026-06-14T15:31:05.771Z"
+    },
+    {
+      "id": "rec-ypt2a24kw",
+      "created_at": "2026-06-14T17:06:52.230Z",
+      "student_id": "rec-lyjjwvm5r",
+      "certificate_type": "Fee Receipt",
+      "status": "Approved",
+      "approved_by": "u-faculty-cse-hod",
+      "document_url": "/documents/approved_certificate.pdf",
+      "updated_at": "2026-06-14T17:30:48.003Z"
+    },
+    {
+      "id": "rec-5l9wrmx0s",
+      "created_at": "2026-06-14T17:28:17.673Z",
+      "student_id": "rec-lyjjwvm5r",
+      "certificate_type": "Fee Receipt",
+      "status": "Pending"
+    }
+  ],
+  "grievances": [
+    {
+      "id": "griev-1",
+      "user_id": "u-student-1",
+      "title": "Slow Wi-Fi in Hostel Block C",
+      "description": "The internet connection speed in Hostel Block C, 3rd floor is extremely slow, making it impossible to complete assignments.",
+      "category": "Infrastructure",
+      "status": "In Progress",
+      "created_at": "2026-06-05T16:20:00Z"
+    },
+    {
+      "id": "griev-2",
+      "user_id": "u-student-2",
+      "title": "Incorrect entry in DBMS assignment",
+      "description": "Assignment marks entered in the portal are 8/10, but the graded physical script shows 9/10.",
+      "category": "Academic",
+      "status": "Resolved",
+      "resolution_details": "Correction updated in the internal marksheet database.",
+      "created_at": "2026-05-18T10:15:00Z"
+    }
+  ],
+  "notices": [
+    {
+      "id": "not-1",
+      "title": "Upcoming Semester Exam Registrations",
+      "content": "Registrations for upcoming Semester Examinations close on 15th June 2026. A late fee of $100 will apply thereafter. Ensure all outstanding fees are paid before registering.",
+      "target_role": "All",
+      "created_by": "u-admin-1",
+      "created_at": "2026-06-01T09:00:00Z"
+    },
+    {
+      "id": "not-2",
+      "title": "Placement Drive: Google APAC 2026",
+      "content": "Google is hosting a virtual placement and internship drive for CSE/AIML students of the 2027 batch. Register in the placement portal. CTC: 32 LPA. Deadline: 20th June.",
+      "target_role": "Student",
+      "created_by": "u-admin-1",
+      "created_at": "2026-06-07T14:00:00Z"
+    },
+    {
+      "id": "not-3",
+      "title": "Faculty Meeting: Syllabus Review",
+      "content": "All department heads and faculty members are requested to attend the syllabus review meeting on Wednesday at 2:00 PM in the Administration Block Auditorium.",
+      "target_role": "Faculty",
+      "created_by": "u-admin-1",
+      "created_at": "2026-06-06T11:00:00Z"
+    },
+    {
+      "id": "rec-ct2icfs9s",
+      "created_at": "2026-06-14T12:03:50.258Z",
+      "title": "Exam Registration",
+      "content": "This is to notify you that the link to the exam registration is open ",
+      "target_role": "All",
+      "created_by": "u-admin-1"
+    }
+  ],
+  "placements": [
+    {
+      "id": "pl-1",
+      "company_name": "Google",
+      "industry": "Software / Technology",
+      "role": "Software Engineer (L3)",
+      "salary_package": "32 LPA",
+      "eligibility_criteria": "CSE/AIML/AIDS, Year 3/4, CGPA >= 8.5, No Active Backlogs",
+      "status": "active",
+      "logo_url": "https://img.icons8.com/color/120/google-logo.png"
+    },
+    {
+      "id": "pl-2",
+      "company_name": "Microsoft",
+      "industry": "Software / Cloud",
+      "role": "Program Manager",
+      "salary_package": "28 LPA",
+      "eligibility_criteria": "Open to All Branches, CGPA >= 8.0",
+      "status": "active",
+      "logo_url": "https://img.icons8.com/color/120/microsoft.png"
+    },
+    {
+      "id": "pl-3",
+      "company_name": "NVIDIA",
+      "industry": "Hardware / AI",
+      "role": "Silicon Architecture Intern",
+      "salary_package": "15 LPA (Stipend: 60k/mo)",
+      "eligibility_criteria": "ECE/EEE/CSE, Year 3, CGPA >= 8.75",
+      "status": "active",
+      "logo_url": "https://img.icons8.com/color/120/nvidia.png"
+    }
+  ],
+  "placement_applications": [
+    {
+      "id": "pl-app-1",
+      "placement_id": "pl-1",
+      "student_id": "u-student-1",
+      "status": "Interviewing",
+      "applied_at": "2026-06-07T18:00:00Z"
+    },
+    {
+      "id": "pl-app-2",
+      "placement_id": "pl-1",
+      "student_id": "u-student-2",
+      "status": "Applied",
+      "applied_at": "2026-06-07T18:30:00Z"
+    }
+  ],
+  "interviews": [
+    {
+      "id": "intv-1",
+      "application_id": "pl-app-1",
+      "round_name": "Technical Round 1: DSA",
+      "date": "2026-06-12T10:00:00Z",
+      "status": "Scheduled",
+      "feedback": ""
+    }
+  ],
+  "campus_locations": [
+    {
+      "id": "loc-gate",
+      "name": "Main Gate",
+      "block_name": "Entrance",
+      "floor": 0,
+      "room_number": "Gate-1",
+      "x": 100,
+      "y": 450
+    },
+    {
+      "id": "loc-admin",
+      "name": "Administration Block",
+      "block_name": "Admin Block",
+      "floor": 1,
+      "room_number": "Admin-101",
+      "x": 250,
+      "y": 380
+    },
+    {
+      "id": "loc-cse",
+      "name": "CSE Block",
+      "block_name": "Block A",
+      "floor": 3,
+      "room_number": "A-301",
+      "x": 400,
+      "y": 200
+    },
+    {
+      "id": "loc-aiml",
+      "name": "AIML Block",
+      "block_name": "Block B",
+      "floor": 2,
+      "room_number": "B-205",
+      "x": 400,
+      "y": 300
+    },
+    {
+      "id": "loc-csbs",
+      "name": "CSBS Block",
+      "block_name": "Block C",
+      "floor": 2,
+      "room_number": "C-201",
+      "x": 400,
+      "y": 400
+    },
+    {
+      "id": "loc-aids",
+      "name": "AIDS Block",
+      "block_name": "Block D",
+      "floor": 1,
+      "room_number": "D-102",
+      "x": 400,
+      "y": 500
+    },
+    {
+      "id": "loc-ece",
+      "name": "ECE Block",
+      "block_name": "Block E",
+      "floor": 2,
+      "room_number": "E-112",
+      "x": 550,
+      "y": 200
+    },
+    {
+      "id": "loc-eee",
+      "name": "EEE Block",
+      "block_name": "Block F",
+      "floor": 1,
+      "room_number": "F-101",
+      "x": 550,
+      "y": 300
+    },
+    {
+      "id": "loc-mech",
+      "name": "MECH Block",
+      "block_name": "Block G",
+      "floor": 1,
+      "room_number": "G-104",
+      "x": 550,
+      "y": 400
+    },
+    {
+      "id": "loc-civil",
+      "name": "CIVIL Block",
+      "block_name": "Block H",
+      "floor": 1,
+      "room_number": "H-101",
+      "x": 550,
+      "y": 500
+    },
+    {
+      "id": "loc-bme",
+      "name": "BME Block",
+      "block_name": "Block I",
+      "floor": 1,
+      "room_number": "I-102",
+      "x": 680,
+      "y": 250
+    },
+    {
+      "id": "loc-mba",
+      "name": "MBA Block",
+      "block_name": "Management Block",
+      "floor": 2,
+      "room_number": "MBA-201",
+      "x": 680,
+      "y": 350
+    },
+    {
+      "id": "loc-library",
+      "name": "Central Library",
+      "block_name": "Library Block",
+      "floor": 2,
+      "room_number": "Library-Main",
+      "x": 250,
+      "y": 220
+    },
+    {
+      "id": "loc-auditorium",
+      "name": "Auditorium",
+      "block_name": "Academic Plaza",
+      "floor": 0,
+      "room_number": "Aud-Main",
+      "x": 180,
+      "y": 150
+    },
+    {
+      "id": "loc-canteen",
+      "name": "Canteen",
+      "block_name": "Food Court",
+      "floor": 0,
+      "room_number": "Canteen-Main",
+      "x": 280,
+      "y": 550
+    },
+    {
+      "id": "loc-hostel-boys",
+      "name": "Boys Hostel",
+      "block_name": "Block C Hostel",
+      "floor": 4,
+      "room_number": "BH-304",
+      "x": 800,
+      "y": 150
+    },
+    {
+      "id": "loc-hostel-girls",
+      "name": "Girls Hostel",
+      "block_name": "Block B Hostel",
+      "floor": 4,
+      "room_number": "GH-102",
+      "x": 800,
+      "y": 300
+    },
+    {
+      "id": "loc-placement",
+      "name": "Placement Cell",
+      "block_name": "Admin Block Annex",
+      "floor": 0,
+      "room_number": "PC-12",
+      "x": 250,
+      "y": 420
+    },
+    {
+      "id": "loc-sports",
+      "name": "Sports Complex",
+      "block_name": "Arena",
+      "floor": 0,
+      "room_number": "Arena-1",
+      "x": 750,
+      "y": 480
+    },
+    {
+      "id": "loc-medical",
+      "name": "Medical Center",
+      "block_name": "Health Block",
+      "floor": 0,
+      "room_number": "Health-1",
+      "x": 180,
+      "y": 480
+    },
+    {
+      "id": "loc-parking",
+      "name": "Parking Area",
+      "block_name": "North Lot",
+      "floor": 0,
+      "room_number": "Parking-1",
+      "x": 100,
+      "y": 200
+    }
+  ],
+  "assignments": [
+    {
+      "id": "asg-dbms-1",
+      "subject_id": "s-dbms",
+      "title": "Assignment 1: SQL Queries and Schema Design",
+      "description": "Design schema DDL and write complex SQL queries using JOINs and Aggregates.",
+      "due_date": "2026-06-15T23:59:59Z",
+      "max_marks": 100,
+      "created_at": "2026-06-05T09:00:00Z"
+    },
+    {
+      "id": "asg-os-1",
+      "subject_id": "s-os",
+      "title": "Assignment 1: CPU Scheduling Simulator",
+      "description": "Implement CPU scheduling algorithms like FCFS, SJF, and Round Robin in C/C++.",
+      "due_date": "2026-06-20T23:59:59Z",
+      "max_marks": 100,
+      "created_at": "2026-06-06T10:00:00Z"
+    },
+    {
+      "id": "asg-ml-1",
+      "subject_id": "s-ml",
+      "title": "Assignment 1: Linear Regression implementation",
+      "description": "Implement linear regression from scratch using numpy and plot loss curve.",
+      "due_date": "2026-06-18T23:59:59Z",
+      "max_marks": 100,
+      "created_at": "2026-06-07T11:00:00Z"
+    }
+  ],
+  "submissions": [
+    {
+      "id": "sub-dbms-1",
+      "assignment_id": "asg-dbms-1",
+      "student_id": "u-student-1",
+      "content_url": "/uploads/submissions/john_dbms1.pdf",
+      "submitted_at": "2026-06-10T14:30:00Z",
+      "marks_obtained": 92,
+      "feedback": "Excellent schema design. Good query optimizations."
+    }
+  ],
+  "notes": [
+    {
+      "id": "note-dbms-1",
+      "user_id": "u-faculty-cse-hod",
+      "title": "DBMS Lecture Notes - Normalization",
+      "content": "Detailing 1NF, 2NF, 3NF, BCNF, and multi-valued dependencies.",
+      "subject_id": "s-dbms",
+      "is_public": true,
+      "file_url": "/documents/notes/dbms_normalization.pdf",
+      "created_at": "2026-05-15T09:00:00Z"
+    },
+    {
+      "id": "note-os-1",
+      "user_id": "u-faculty-cse-hod",
+      "title": "OS - Deadlocks and Semaphores",
+      "content": "Detailed discussion on Bankers algorithm and dining philosophers problem.",
+      "subject_id": "s-os",
+      "is_public": true,
+      "file_url": "/documents/notes/os_deadlocks.pdf",
+      "created_at": "2026-05-20T10:00:00Z"
+    }
+  ],
+  "system_settings": [
+    {
+      "key": "academic_year",
+      "value": "2025-2026"
+    },
+    {
+      "key": "semester_type",
+      "value": "Odd Semester"
+    },
+    {
+      "key": "copilot_enabled",
+      "value": "true"
+    }
+  ],
+  "messages": [],
+  "notifications": [],
+  "ai_chat_history": [],
+  "activity_logs": [],
+  "audit_logs": [
+    {
+      "id": "rec-ka0p2ntsf",
+      "created_at": "2026-06-08T19:28:47.970Z",
+      "user_id": "u-admin-1",
+      "table_name": "departments",
+      "action": "UPDATE_HOD",
+      "new_data": {
+        "id": "d-cse",
+        "hod_id": "u-faculty-cse-hod"
+      }
+    },
+    {
+      "id": "rec-zk4wnnv6q",
+      "created_at": "2026-06-09T04:47:10.429Z",
+      "user_id": "u-admin-1",
+      "table_name": "departments",
+      "action": "UPDATE_HOD",
+      "new_data": {
+        "id": "d-aiml",
+        "hod_id": "u-faculty-aiml"
+      }
+    },
+    {
+      "id": "rec-5ajnvhlg2",
+      "created_at": "2026-06-09T16:30:48.227Z",
+      "user_id": "u-admin-1",
+      "table_name": "profiles",
+      "action": "INSERT",
+      "new_data": {
+        "id": "rec-ma7xgb1cp",
+        "created_at": "2026-06-09T16:30:48.087Z",
+        "name": "Rohini",
+        "email": "rohini@gmail.com",
+        "role": "student"
+      }
+    },
+    {
+      "id": "rec-t3s0lmozp",
+      "created_at": "2026-06-09T16:31:11.578Z",
+      "user_id": "u-admin-1",
+      "table_name": "profiles",
+      "action": "INSERT",
+      "new_data": {
+        "id": "rec-aza9hxu3x",
+        "created_at": "2026-06-09T16:31:11.470Z",
+        "name": "bhargavi",
+        "email": "bhargavi@gmail.com",
+        "role": "student"
+      }
+    },
+    {
+      "id": "rec-i86noaalr",
+      "created_at": "2026-06-09T16:34:27.647Z",
+      "user_id": "u-admin-1",
+      "table_name": "departments",
+      "action": "UPDATE_HOD",
+      "new_data": {
+        "id": "d-ece",
+        "hod_id": "u-faculty-ece"
+      }
+    },
+    {
+      "id": "rec-kja6ifeqg",
+      "created_at": "2026-06-14T16:32:47.542Z",
+      "user_id": "u-admin-1",
+      "table_name": "departments",
+      "action": "UPDATE_HOD",
+      "new_data": {
+        "id": "d-aiml",
+        "hod_id": ""
+      }
+    },
+    {
+      "id": "rec-gco9dk85l",
+      "created_at": "2026-06-14T16:59:07.970Z",
+      "user_id": "u-admin-1",
+      "table_name": "departments",
+      "action": "UPDATE_HOD",
+      "new_data": {
+        "id": "d-aiml",
+        "hod_id": "u-faculty-aiml"
+      }
+    },
+    {
+      "id": "rec-v45uo8gwk",
+      "created_at": "2026-06-14T16:59:13.022Z",
+      "user_id": "u-admin-1",
+      "table_name": "departments",
+      "action": "UPDATE_HOD",
+      "new_data": {
+        "id": "d-aiml",
+        "hod_id": ""
+      }
+    },
+    {
+      "id": "rec-j8e4i67jj",
+      "created_at": "2026-06-14T17:12:28.528Z",
+      "user_id": "u-admin-1",
+      "table_name": "departments",
+      "action": "UPDATE_HOD",
+      "new_data": {
+        "id": "d-aiml",
+        "hod_id": "u-faculty-ece"
+      }
+    },
+    {
+      "id": "rec-ylux7y2m4",
+      "created_at": "2026-06-14T17:12:35.829Z",
+      "user_id": "u-admin-1",
+      "table_name": "departments",
+      "action": "UPDATE_HOD",
+      "new_data": {
+        "id": "d-aiml",
+        "hod_id": ""
+      }
+    },
+    {
+      "id": "rec-nvfqjyl45",
+      "created_at": "2026-06-14T17:32:39.471Z",
+      "user_id": "u-admin-1",
+      "table_name": "departments",
+      "action": "UPDATE_HOD",
+      "new_data": {
+        "id": "d-aiml",
+        "hod_id": "u-faculty-aiml"
+      }
+    }
+  ],
+  "skills": [
+    {
+      "id": "sk-1",
+      "name": "React & Next.js",
+      "category": "Technical"
+    },
+    {
+      "id": "sk-2",
+      "name": "Python & PyTorch",
+      "category": "Technical"
+    },
+    {
+      "id": "sk-3",
+      "name": "SQL & Database Design",
+      "category": "Technical"
+    },
+    {
+      "id": "sk-4",
+      "name": "Public Speaking",
+      "category": "Soft Skill"
+    }
+  ],
+  "student_skills": [
+    {
+      "student_id": "u-student-1",
+      "skill_id": "sk-1",
+      "proficiency_level": "Advanced"
+    },
+    {
+      "student_id": "u-student-1",
+      "skill_id": "sk-3",
+      "proficiency_level": "Intermediate"
+    },
+    {
+      "student_id": "u-student-2",
+      "skill_id": "sk-2",
+      "proficiency_level": "Advanced"
+    }
+  ],
+  "resume_uploads": [
+    {
+      "id": "rec-ltywds5do",
+      "created_at": "2026-06-14T15:13:12.407Z",
+      "student_id": "rec-lyjjwvm5r",
+      "file_url": "/uploads/resumes/latest_uploaded.pdf",
+      "parsed_content_json": {
+        "text": "PROFESSIONAL SUMMARY \nInnovative and detail-oriented B.Tech CSBS student (CGPA: 8.4) with practical experience in full-stack web development, data \nanalytics, and software project leadership. Skilled in Python, Django, data visualization, and problem-solving through \ntechnology. Completed an e-commerce analytics internship and developed impactful projects across education, sustainability, \nand smart management domains. Seeking opportunities in Full Stack Development, Data Analytics and AI/ML. \nSKILLS \nLanguages: Python, Java     Frontend: HTML, CSS, JavaScript     Backend: Django \nDatabase: PostgreSQL, MongoDB     Tools & Platforms: Git, Supabase, Render, Jupyter Notebook, Pandas, NumPy, Matplotlib. \nEXPERIENCE \nData Analyst Intern | VTAB Square Private Limited \nMay 2026 \n• Cleaned, pre-processed and performed EDA on an e-commerce sales dataset using Python (Pandas, NumPy). \n• Built visualizations with Matplotlib and Seaborn to surface customer behaviour patterns, regional trends, and "
+      },
+      "score": 75,
+      "analysis_json": {
+        "score": 75,
+        "strengths": [
+          "Clean resume structure",
+          "Good list of programming languages"
+        ],
+        "weaknesses": [
+          "Missing quantitative project metrics",
+          "Sparsely detailed project descriptions"
+        ],
+        "skill_gaps": [
+          "System Design",
+          "Unit Testing (Jest)",
+          "Docker / Containerization",
+          "CI/CD Pipelines"
+        ],
+        "recommendations": [
+          "Include bullet points starting with strong action verbs.",
+          "Add quantitative metrics (e.g., 'reduced load times by 25%').",
+          "Add a projects section highlighting full-stack architectures."
+        ]
+      }
+    },
+    {
+      "id": "rec-43ufvhruo",
+      "created_at": "2026-06-14T15:27:14.874Z",
+      "student_id": "rec-lyjjwvm5r",
+      "file_url": "/uploads/resumes/latest_uploaded.pdf",
+      "parsed_content_json": {
+        "text": "LANA HARRIET C \nlanaharriet1408@gmail.com | +91 9345725617 | Coimbatore, Tamil Nadu    \nhttps://www.linkedin.com/in/lana-harriet-c | https://github.com/lanaharriet  \nPROFESSIONAL SUMMARY \nInnovative and detail-oriented B.Tech CSBS student (CGPA: 8.4) with practical experience in full-stack web development, data \nanalytics, and software project leadership. Skilled in Python, Django, data visualization, and problem-solving through \ntechnology. Completed an e-commerce analytics internship and developed impactful projects across education, sustainability, \nand smart management domains. Seeking opportunities in Full Stack Development, Data Analytics and AI/ML. \nSKILLS \nLanguages: Python, Java     Frontend: HTML, CSS, JavaScript     Backend: Django \nDatabase: PostgreSQL, MongoDB     Tools & Platforms: Git, Supabase, Render, Jupyter Notebook, Pandas, NumPy, Matplotlib. \nEXPERIENCE \nData Analyst Intern | VTAB Square Private Limited \nMay 2026 \n• Cleaned, pre-processed and performed EDA on an e-"
+      },
+      "score": 75,
+      "analysis_json": {
+        "score": 75,
+        "strengths": [
+          "Clean resume structure",
+          "Good list of programming languages"
+        ],
+        "weaknesses": [
+          "Missing quantitative project metrics",
+          "Sparsely detailed project descriptions"
+        ],
+        "skill_gaps": [
+          "System Design",
+          "Unit Testing (Jest)",
+          "Docker / Containerization",
+          "CI/CD Pipelines"
+        ],
+        "recommendations": [
+          "Include bullet points starting with strong action verbs.",
+          "Add quantitative metrics (e.g., 'reduced load times by 25%').",
+          "Add a projects section highlighting full-stack architectures."
+        ]
+      }
+    },
+    {
+      "id": "rec-q9vn3gke8",
+      "created_at": "2026-06-14T15:28:18.939Z",
+      "student_id": "rec-lyjjwvm5r",
+      "file_url": "/uploads/resumes/latest_uploaded.pdf",
+      "parsed_content_json": {
+        "text": "MONIKASRI B N \nFull Stack Developer | B.Tech CSBS  \n+91 8903466338  |  monikasribn@gmail.com  |  Coimbatore, Tamil Nadu \nlinkedin.com/in/monikasri-b-n-dev  |  github.com/monika-2508 \nPROFESSIONAL SUMMARY \nMotivated Third-year B. Tech Computer Science and Business Systems student at Dr. N.G.P. Institute of Technology (CGPA: 8.41) with \npractical experience in full-stack development using Python, Django, Java, and MongoDB. Built and proposed AI-powered web applications \nwith database integration. Completed an industry internship at ISL and earned certifications in Python and Java full-stack development.  \nEDUCATION \nDr. N.G.P. Institute of Technology  —  B. Tech in Computer Science & Business Systems \nNirmala Matha Convent Matric. Hr. Sec. School  —  Higher Secondary (Class XII) \nTECHNICAL SKILLS \n2024 – 2028   |   CGPA: 8.41 \n2024   |   85.6% \nLanguages \nFrontend \nBackend \nDatabases \nTools \nSoft Skills \nPROJECTS \nPython, Java  \nHTML5, CSS3, JavaScript \nDjango, Spring Boot (exposure) \nPo"
+      },
+      "score": 75,
+      "analysis_json": {
+        "score": 75,
+        "strengths": [
+          "Clean resume structure",
+          "Good list of programming languages"
+        ],
+        "weaknesses": [
+          "Missing quantitative project metrics",
+          "Sparsely detailed project descriptions"
+        ],
+        "skill_gaps": [
+          "System Design",
+          "Unit Testing (Jest)",
+          "Docker / Containerization",
+          "CI/CD Pipelines"
+        ],
+        "recommendations": [
+          "Include bullet points starting with strong action verbs.",
+          "Add quantitative metrics (e.g., 'reduced load times by 25%').",
+          "Add a projects section highlighting full-stack architectures."
+        ]
+      }
+    },
+    {
+      "id": "rec-vos37t93d",
+      "created_at": "2026-06-14T17:07:09.212Z",
+      "student_id": "rec-lyjjwvm5r",
+      "file_url": "/uploads/resumes/latest_uploaded.pdf",
+      "parsed_content_json": {
+        "text": "LANA HARRIET C \nlanaharriet1408@gmail.com | +91 9345725617 | Coimbatore, Tamil Nadu    \nhttps://www.linkedin.com/in/lana-harriet-c | https://github.com/lanaharriet  \nPROFESSIONAL SUMMARY \nInnovative and detail-oriented B.Tech CSBS student (CGPA: 8.4) with practical experience in full-stack web development, data \nanalytics, and software project leadership. Skilled in Python, Django, data visualization, and problem-solving through \ntechnology. Completed an e-commerce analytics internship and developed impactful projects across education, sustainability, \nand smart management domains. Seeking opportunities in Full Stack Development, Data Analytics and AI/ML. \nSKILLS \nLanguages: Python, Java     Frontend: HTML, CSS, JavaScript     Backend: Django \nDatabase: PostgreSQL, MongoDB     Tools & Platforms: Git, Supabase, Render, Jupyter Notebook, Pandas, NumPy, Matplotlib. \nEXPERIENCE \nData Analyst Intern | VTAB Square Private Limited \nMay 2026 \n• Cleaned, pre-processed and performed EDA on an e-"
+      },
+      "score": 75,
+      "analysis_json": {
+        "score": 75,
+        "strengths": [
+          "Clean resume structure",
+          "Good list of programming languages"
+        ],
+        "weaknesses": [
+          "Missing quantitative project metrics",
+          "Sparsely detailed project descriptions"
+        ],
+        "skill_gaps": [
+          "System Design",
+          "Unit Testing (Jest)",
+          "Docker / Containerization",
+          "CI/CD Pipelines"
+        ],
+        "recommendations": [
+          "Include bullet points starting with strong action verbs.",
+          "Add quantitative metrics (e.g., 'reduced load times by 25%').",
+          "Add a projects section highlighting full-stack architectures."
+        ]
+      }
+    },
+    {
+      "id": "rec-h4bynirx2",
+      "created_at": "2026-06-14T17:29:02.402Z",
+      "student_id": "rec-lyjjwvm5r",
+      "file_url": "/uploads/resumes/latest_uploaded.pdf",
+      "parsed_content_json": {
+        "text": "LANA HARRIET C \nlanaharriet1408@gmail.com | +91 9345725617 | Coimbatore, Tamil Nadu    \nhttps://www.linkedin.com/in/lana-harriet-c | https://github.com/lanaharriet  \nPROFESSIONAL SUMMARY \nInnovative and detail-oriented B.Tech CSBS student (CGPA: 8.4) with practical experience in full-stack web development, data \nanalytics, and software project leadership. Skilled in Python, Django, data visualization, and problem-solving through \ntechnology. Completed an e-commerce analytics internship and developed impactful projects across education, sustainability, \nand smart management domains. Seeking opportunities in Full Stack Development, Data Analytics and AI/ML. \nSKILLS \nLanguages: Python, Java     Frontend: HTML, CSS, JavaScript     Backend: Django \nDatabase: PostgreSQL, MongoDB     Tools & Platforms: Git, Supabase, Render, Jupyter Notebook, Pandas, NumPy, Matplotlib. \nEXPERIENCE \nData Analyst Intern | VTAB Square Private Limited \nMay 2026 \n• Cleaned, pre-processed and performed EDA on an e-"
+      },
+      "score": 75,
+      "analysis_json": {
+        "score": 75,
+        "strengths": [
+          "Clean resume structure",
+          "Good list of programming languages"
+        ],
+        "weaknesses": [
+          "Missing quantitative project metrics",
+          "Sparsely detailed project descriptions"
+        ],
+        "skill_gaps": [
+          "System Design",
+          "Unit Testing (Jest)",
+          "Docker / Containerization",
+          "CI/CD Pipelines"
+        ],
+        "recommendations": [
+          "Include bullet points starting with strong action verbs.",
+          "Add quantitative metrics (e.g., 'reduced load times by 25%').",
+          "Add a projects section highlighting full-stack architectures."
+        ]
+      }
+    }
+  ],
+  "achievements": [
+    {
+      "id": "ach-1",
+      "student_id": "u-student-1",
+      "title": "Smart India Hackathon Winner",
+      "description": "First prize in smart education category.",
+      "date": "2026-03-12",
+      "category": "Hackathon"
+    }
+  ],
+  "timetables": [
+    {
+      "id": "rec-fzj41jmf0",
+      "created_at": "2026-06-14T12:02:26.297Z",
+      "name": "2026 Odd Semester",
+      "semester_id": "sem-active",
+      "is_active": true
+    }
+  ],
+  "timetable_entries": [
+    {
+      "id": "rec-t2nrqnn5d",
+      "created_at": "2026-06-14T12:02:34.184Z",
+      "timetable_id": "rec-fzj41jmf0",
+      "day_of_week": 1,
+      "start_time": "09:00",
+      "end_time": "10:30",
+      "subject_id": "s-dbms",
+      "room_number": "B-401",
+      "type": "class",
+      "student_id": "u-student-3"
+    },
+    {
+      "id": "rec-ntg653k7p",
+      "created_at": "2026-06-14T12:02:44.195Z",
+      "timetable_id": "rec-fzj41jmf0",
+      "day_of_week": 1,
+      "start_time": "09:00",
+      "end_time": "10:30",
+      "subject_id": "s-dbms",
+      "room_number": "B-401",
+      "type": "teaching",
+      "faculty_id": "u-faculty-cse-hod"
+    },
+    {
+      "id": "rec-kujfgnggf",
+      "created_at": "2026-06-14T12:06:04.267Z",
+      "timetable_id": "rec-fzj41jmf0",
+      "day_of_week": 1,
+      "start_time": "09:00",
+      "end_time": "10:30",
+      "subject_id": "s-ml",
+      "room_number": "A-14",
+      "type": "class",
+      "student_id": "rec-lyjjwvm5r",
+      "faculty_id": "u-faculty-cse-hod"
+    },
+    {
+      "id": "rec-9ti7g6gj4",
+      "created_at": "2026-06-14T12:06:17.071Z",
+      "timetable_id": "rec-fzj41jmf0",
+      "day_of_week": 1,
+      "start_time": "09:00",
+      "end_time": "10:30",
+      "subject_id": "s-ml",
+      "room_number": "A-14",
+      "type": "class",
+      "student_id": "u-student-1",
+      "faculty_id": "u-faculty-cse-hod"
+    },
+    {
+      "id": "rec-bacaiv1or",
+      "created_at": "2026-06-14T15:33:35.138Z",
+      "timetable_id": "rec-fzj41jmf0",
+      "day_of_week": 2,
+      "start_time": "10:00",
+      "end_time": "11:30",
+      "subject_id": "s-os",
+      "room_number": "C-56",
+      "type": "class",
+      "student_id": "rec-lyjjwvm5r"
+    },
+    {
+      "id": "rec-im2i2g5zr",
+      "created_at": "2026-06-14T16:30:28.979Z",
+      "timetable_id": "rec-fzj41jmf0",
+      "day_of_week": 1,
+      "start_time": "10:30",
+      "end_time": "12:00",
+      "subject_id": "s-dsp",
+      "room_number": "C-56",
+      "type": "class",
+      "student_id": "rec-lyjjwvm5r"
+    },
+    {
+      "id": "rec-ngr5o5s3e",
+      "created_at": "2026-06-14T16:31:05.257Z",
+      "timetable_id": "rec-fzj41jmf0",
+      "day_of_week": 2,
+      "start_time": "09:30",
+      "end_time": "11:00",
+      "subject_id": "s-os",
+      "room_number": "B-201",
+      "type": "class",
+      "student_id": "rec-lyjjwvm5r"
+    },
+    {
+      "id": "rec-0mi18rek3",
+      "created_at": "2026-06-14T16:31:45.191Z",
+      "timetable_id": "rec-fzj41jmf0",
+      "day_of_week": 3,
+      "start_time": "02:00",
+      "end_time": "04:00",
+      "subject_id": "s-dbms",
+      "room_number": "A-11",
+      "type": "class",
+      "student_id": "rec-lyjjwvm5r"
+    },
+    {
+      "id": "rec-es9dadkpg",
+      "created_at": "2026-06-14T16:31:54.428Z",
+      "timetable_id": "rec-fzj41jmf0",
+      "day_of_week": 3,
+      "start_time": "02:00",
+      "end_time": "04:00",
+      "subject_id": "s-dbms",
+      "room_number": "A-11",
+      "type": "teaching"
+    },
+    {
+      "id": "rec-qdmanj2cr",
+      "created_at": "2026-06-14T16:32:01.193Z",
+      "timetable_id": "rec-fzj41jmf0",
+      "day_of_week": 3,
+      "start_time": "02:00",
+      "end_time": "04:00",
+      "subject_id": "s-dbms",
+      "room_number": "A-11",
+      "type": "teaching",
+      "faculty_id": "u-faculty-cse-hod"
+    }
+  ],
+  "events": [
+    {
+      "id": "rec-ceec28djl",
+      "created_at": "2026-06-14T12:04:54.147Z",
+      "title": "Tech Symposium 2026",
+      "description": "Project Expo and 24 hours Hackathon",
+      "location": "Central Auditorium",
+      "date": "2026-06-20T00:00:00.000Z",
+      "organizer_id": "u-admin-1"
+    }
+  ]
+}

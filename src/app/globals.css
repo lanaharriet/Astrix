@@ -1,0 +1,156 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+  --background: #FAF7F0;
+  --surface: #FFFFFF;
+  --primary: #B8860B;
+  --primary-foreground: #FFFFFF;
+  --secondary: #6D28D9;
+  --secondary-foreground: #FFFFFF;
+  --success: #10B981;
+  --text: #111827;
+  --border: #E2E8F0;
+  --muted: #64748B;
+  --muted-foreground: #94A3B8;
+  --card-bg: #FFFFFF;
+  --accent: #F1F5F9;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(226, 232, 240, 0.8);
+  --ring: rgba(184, 134, 11, 0.3);
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #0F1115;
+  --surface: #1A1D24;
+  --primary: #D4A017;
+  --primary-foreground: #0F1115;
+  --secondary: #7C3AED;
+  --secondary-foreground: #FFFFFF;
+  --success: #10B981;
+  --text: #F5F5F5;
+  --border: #2A2F3D;
+  --muted: #94A3B8;
+  --muted-foreground: #64748B;
+  --card-bg: #1A1D24;
+  --accent: #242936;
+  --glass-bg: rgba(26, 29, 36, 0.75);
+  --glass-border: rgba(42, 47, 61, 0.5);
+  --ring: rgba(212, 160, 23, 0.3);
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-success: var(--success);
+  --color-text: var(--text);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card-bg: var(--card-bg);
+  --color-accent: var(--accent);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+  --color-ring: var(--ring);
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--text);
+  font-family: var(--font-sans);
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism utility */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
+/* Custom Cursor active desktop override */
+body.custom-cursor-active,
+body.custom-cursor-active * {
+  cursor: none !important;
+}
+
+/* Performance-safe Premium CSS Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.02);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 6s ease-in-out infinite;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
