@@ -50,9 +50,8 @@ export default function ParentDashboard() {
 
   // Messages states
   const [msgText, setMsgText] = useState('');
-  const [messages, setMessages] = useState<any[]>([
-    { sender: 'faculty', text: 'Hello, I am John\'s DBMS advisor. He has been participating actively in labs, but needs to work on normalization homework.', time: '2026-06-07T10:14:00Z' }
-  ]);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [advisorId, setAdvisorId] = useState('u-faculty-cse-hod');
 
   useEffect(() => {
     const userStr = localStorage.getItem('astrix-user');
@@ -84,6 +83,15 @@ export default function ParentDashboard() {
           name: stdName[0]?.name || 'John Doe',
           email: stdName[0]?.email || 'john.doe@astrix.edu',
         });
+        
+        // Resolve advisor HOD ID based on student department
+        if (stdProfile[0].department_id === 'd-aiml') {
+          setAdvisorId('u-faculty-aiml');
+        } else if (stdProfile[0].department_id === 'd-ece') {
+          setAdvisorId('u-faculty-ece');
+        } else {
+          setAdvisorId('u-faculty-cse-hod');
+        }
       }
 
       // 3. Fetch academic, attendance and financial data
@@ -156,12 +164,68 @@ export default function ParentDashboard() {
     }
   };
 
+  // Load messages from database table
+  const loadMessages = async (userId: string, targetAdvisorId: string) => {
+    try {
+      const allMsgs = await db.messages.select();
+      const filtered = allMsgs.filter(m => 
+        (m.sender_id === userId && m.receiver_id === targetAdvisorId) ||
+        (m.sender_id === targetAdvisorId && m.receiver_id === userId)
+      ).sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+
+      if (filtered.length === 0) {
+        const welcome = {
+          sender_id: targetAdvisorId,
+          receiver_id: userId,
+          sender_name: 'Dr. Alan Turing',
+          sender_role: 'faculty',
+          text: "Hello, I am John's DBMS advisor. He has been participating actively in labs, but needs to work on normalization homework.",
+          time: '2026-06-07T10:14:00Z'
+        };
+        await db.messages.insert(welcome);
+        setMessages([welcome]);
+      } else {
+        setMessages(filtered);
+      }
+    } catch (err) {
+      console.warn('Failed to load parent-advisor messages:', err);
+    }
+  };
+
+  // Poll for real-time messages every 3 seconds
+  useEffect(() => {
+    if (!currentUser || !advisorId) return;
+    loadMessages(currentUser.id, advisorId);
+
+    const interval = setInterval(() => {
+      loadMessages(currentUser.id, advisorId);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentUser, advisorId]);
+
   // Send message to advisor
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!msgText.trim()) return;
-    setMessages(prev => [...prev, { sender: 'parent', text: msgText, time: new Date().toISOString() }]);
+
+    const newMsg = {
+      sender_id: currentUser.id,
+      receiver_id: advisorId,
+      sender_name: currentUser.name,
+      sender_role: 'parent',
+      text: msgText,
+      time: new Date().toISOString()
+    };
+
+    setMessages(prev => [...prev, newMsg]);
     setMsgText('');
+
+    try {
+      await db.messages.insert(newMsg);
+    } catch (err) {
+      console.error('Failed to send message:', err);
+    }
   };
 
   return (
@@ -265,7 +329,7 @@ export default function ParentDashboard() {
 
         {/* 1. CHILD OVERVIEW */}
         {activeTab === 'overview' && (
-          <div className="grid md:grid-cols-3 gap-8 items-start">
+          <div className="grid md:grid-cols-3 gap-8 items-start animate-fadeIn">
             
             {/* Child Profile Cards & Parent Profile Edit */}
             <div className="space-y-6">
@@ -447,7 +511,7 @@ export default function ParentDashboard() {
 
         {/* 2. ACADEMICS */}
         {activeTab === 'academics' && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fadeIn">
             <div className="grid md:grid-cols-3 gap-8">
               
               {/* Grading Reports */}
@@ -499,7 +563,7 @@ export default function ParentDashboard() {
 
         {/* 3. FEES */}
         {activeTab === 'fees' && (
-          <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4 max-w-4xl">
+          <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4 max-w-4xl animate-fadeIn">
             <h3 className="font-bold text-base flex items-center gap-2"><CreditCard size={18} className="text-primary" /> Billing & Tuition Fees</h3>
             <p className="text-xs text-muted">Clear academic semester billing invoices. Payments are processed securely via Supabase.</p>
 
@@ -534,7 +598,7 @@ export default function ParentDashboard() {
 
         {/* 4. MESSAGES */}
         {activeTab === 'messages' && (
-          <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm max-w-4xl flex flex-col h-[480px]">
+          <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm max-w-4xl flex flex-col h-[480px] animate-fadeIn">
             <h3 className="font-bold text-base flex items-center gap-2 pb-3 border-b border-border/40"><MessageSquare size={18} className="text-secondary" /> Faculty Advisor Chatbox</h3>
             
             {/* Messages box */}
@@ -543,9 +607,9 @@ export default function ParentDashboard() {
                 <div 
                   key={idx} 
                   className={`p-3 rounded-xl max-w-[80%] leading-relaxed ${
-                    msg.sender === 'parent' 
-                      ? 'bg-primary text-primary-foreground ml-auto' 
-                      : 'bg-background border border-border'
+                    (msg.sender === 'parent' || msg.sender_role === 'parent')
+                      ? 'bg-primary text-primary-foreground ml-auto animate-fadeIn' 
+                      : 'bg-background border border-border animate-fadeIn'
                   }`}
                 >
                   <p className="font-medium">{msg.text}</p>

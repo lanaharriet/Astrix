@@ -1017,7 +1017,38 @@
       "value": "true"
     }
   ],
-  "messages": [],
+  "messages": [
+    {
+      "id": "rec-ybhnn6wod",
+      "created_at": "2026-06-20T13:47:21.232Z",
+      "sender_id": "u-faculty-cse-hod",
+      "receiver_id": "u-parent-1",
+      "sender_name": "Dr. Alan Turing",
+      "sender_role": "faculty",
+      "text": "Hello, I am John's DBMS advisor. He has been participating actively in labs, but needs to work on normalization homework.",
+      "time": "2026-06-07T10:14:00Z"
+    },
+    {
+      "id": "rec-bhf4qyd6u",
+      "created_at": "2026-06-20T14:09:01.529Z",
+      "sender_id": "u-parent-1",
+      "receiver_id": "u-faculty-cse-hod",
+      "sender_name": "Richard Doe",
+      "sender_role": "parent",
+      "text": "hi ",
+      "time": "2026-06-20T14:09:01.528Z"
+    },
+    {
+      "id": "rec-l6ryn5e2a",
+      "created_at": "2026-06-20T14:09:26.450Z",
+      "sender_id": "u-faculty-cse-hod",
+      "receiver_id": "u-parent-1",
+      "sender_name": "Dr. Alan Turing",
+      "sender_role": "faculty",
+      "text": "Hello sirr/mam",
+      "time": "2026-06-20T14:09:26.450Z"
+    }
+  ],
   "notifications": [],
   "ai_chat_history": [],
   "activity_logs": [],

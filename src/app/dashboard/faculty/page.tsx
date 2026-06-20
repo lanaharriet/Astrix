@@ -30,7 +30,8 @@ import {
   Menu,
   X,
   Sun,
-  Moon
+  Moon,
+  MessageSquare
 } from 'lucide-react';
 
 export default function FacultyDashboard() {
@@ -42,7 +43,7 @@ export default function FacultyDashboard() {
   const [facultyProfile, setFacultyProfile] = useState<any>(null);
 
   // Tab views
-  const [activeTab, setActiveTab] = useState<'directory' | 'timetable' | 'attendance' | 'grading' | 'watchlist' | 'approvals'>('directory');
+  const [activeTab, setActiveTab] = useState<'directory' | 'timetable' | 'attendance' | 'grading' | 'watchlist' | 'approvals' | 'messages'>('directory');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
@@ -50,6 +51,12 @@ export default function FacultyDashboard() {
     { role: 'assistant', content: 'Welcome Dr. Turing. I am your Faculty Copilot. I can assist with syllabus status, student grades calculation, or drafting notices.' }
   ]);
   const [isAiLoading, setIsAiLoading] = useState(false);
+
+  // Parent Chat States
+  const [parentList, setParentList] = useState<any[]>([]);
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
+  const [parentMessages, setParentMessages] = useState<any[]>([]);
+  const [parentMsgText, setParentMsgText] = useState('');
 
   // Loaded database records
   const [students, setStudents] = useState<any[]>([]);
@@ -128,6 +135,29 @@ export default function FacultyDashboard() {
       // 6. Timetables
       const tt = await db.timetable_entries.select({ faculty_id: userId });
       setTimetableEntries(tt);
+
+      // 7. Fetch parents of students under HOD's department
+      const allParents = await db.parents.select();
+      const parentProfiles = await db.profiles.select({ role: 'parent' });
+      const mappedParents = allParents.map(p => {
+        const parentP = parentProfiles.find(pr => pr.id === p.profile_id);
+        const childP = profiles.find(pr => pr.id === p.student_id);
+        return {
+          ...p,
+          name: parentP?.name || 'Richard Doe',
+          email: parentP?.email || '',
+          avatar_url: parentP?.avatar_url || '',
+          childName: childP?.name || 'John Doe'
+        };
+      });
+      const facultyDeptId = facs[0]?.department_id || 'd-cse';
+      const deptStudentIds = studs.filter(s => s.department_id === facultyDeptId).map(s => s.profile_id);
+      const filteredParents = mappedParents.filter(p => deptStudentIds.includes(p.student_id));
+      
+      setParentList(filteredParents);
+      if (filteredParents[0] && !selectedParentId) {
+        setSelectedParentId(filteredParents[0].profile_id);
+      }
     } catch (err) {
       console.error('Error loading faculty dashboard data:', err);
     }
@@ -271,6 +301,57 @@ export default function FacultyDashboard() {
     }
   };
 
+  // Load parent messages from database table
+  const loadParentMessages = async (userId: string, targetParentId: string) => {
+    try {
+      const allMsgs = await db.messages.select();
+      const filtered = allMsgs.filter(m =>
+        (m.sender_id === userId && m.receiver_id === targetParentId) ||
+        (m.sender_id === targetParentId && m.receiver_id === userId)
+      ).sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+
+      setParentMessages(filtered);
+    } catch (err) {
+      console.warn('Failed to load parent messages:', err);
+    }
+  };
+
+  // Poll parent messages in real-time every 3 seconds when active
+  useEffect(() => {
+    if (!currentUser || !selectedParentId || activeTab !== 'messages') return;
+    loadParentMessages(currentUser.id, selectedParentId);
+
+    const interval = setInterval(() => {
+      loadParentMessages(currentUser.id, selectedParentId);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [currentUser, selectedParentId, activeTab]);
+
+  // Send message to parent
+  const handleSendParentMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!parentMsgText.trim() || !selectedParentId) return;
+
+    const newMsg = {
+      sender_id: currentUser.id,
+      receiver_id: selectedParentId,
+      sender_name: currentUser.name,
+      sender_role: 'faculty',
+      text: parentMsgText,
+      time: new Date().toISOString()
+    };
+
+    setParentMessages(prev => [...prev, newMsg]);
+    setParentMsgText('');
+
+    try {
+      await db.messages.insert(newMsg);
+    } catch (err) {
+      console.error('Failed to send parent message:', err);
+    }
+  };
+
   // Watchlist computation: filter students at risk
   const riskWatchlist = useMemo(() => {
     return students.filter(s => {
@@ -337,6 +418,12 @@ export default function FacultyDashboard() {
             >
               <CheckCircle size={16} /> Approvals Desk
             </button>
+            <button 
+              onClick={() => setActiveTab('messages')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'messages' ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-accent'}`}
+            >
+              <MessageSquare size={16} /> Parent Chats
+            </button>
           </nav>
         </div>
 
@@ -402,7 +489,7 @@ export default function FacultyDashboard() {
 
         {/* 1. STUDENT DIRECTORY */}
         {activeTab === 'directory' && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fadeIn">
             <div className="grid md:grid-cols-3 gap-8 items-start">
               {/* ID Card Display */}
               <div className="md:col-span-1 flex flex-col items-center">
@@ -608,7 +695,7 @@ export default function FacultyDashboard() {
 
         {/* 2. ATTENDANCE HUB */}
         {activeTab === 'attendance' && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fadeIn">
             <div className="grid md:grid-cols-2 gap-8">
               {/* QR Code Generator */}
               <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
@@ -680,7 +767,7 @@ export default function FacultyDashboard() {
 
         {/* 3. GRADING & CALCULATOR */}
         {activeTab === 'grading' && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fadeIn">
             <div className="grid md:grid-cols-2 gap-8">
               {/* Enter Marks Form */}
               <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
@@ -801,7 +888,7 @@ export default function FacultyDashboard() {
 
         {/* 4. WATCHLIST & RISKS */}
         {activeTab === 'watchlist' && (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-fadeIn">
             <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm">
               <h3 className="font-bold text-base mb-1 flex items-center gap-2 text-red-500"><AlertOctagon size={18} /> Student Risk Watchlist</h3>
               <p className="text-xs text-muted mb-4">Highlights students falling below academic CGPA (8.0) or attendance thresholds (75%).</p>
@@ -828,7 +915,7 @@ export default function FacultyDashboard() {
 
         {/* 5. APPROVALS DESK */}
         {activeTab === 'approvals' && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fadeIn">
             <div className="grid md:grid-cols-2 gap-8">
               {/* Leave Requests Approvals */}
               <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
@@ -896,6 +983,105 @@ export default function FacultyDashboard() {
                   {certificates.length === 0 && <p className="text-xs text-muted">No pending certificate requests.</p>}
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* 7. PARENT MESSAGES */}
+        {activeTab === 'messages' && (
+          <div className="space-y-6 max-w-5xl h-[calc(100vh-140px)] flex flex-col md:flex-row gap-6 animate-[fadeIn_0.3s_ease-out]">
+            {/* Left Column: Parents List */}
+            <div className="w-full md:w-80 bg-surface border border-border rounded-2xl p-4 flex flex-col shadow-sm">
+              <h3 className="font-bold text-sm mb-3 border-b border-border/40 pb-2 flex items-center gap-2">
+                <Users size={16} className="text-primary" /> Advisor-Parent Directory
+              </h3>
+              <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+                {parentList.map((p, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedParentId(p.profile_id)}
+                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-center gap-3 ${
+                      selectedParentId === p.profile_id
+                        ? 'border-primary bg-primary/5 shadow-sm'
+                        : 'border-border/40 hover:bg-accent/40'
+                    }`}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-secondary flex items-center justify-center font-bold text-white text-[10px]">
+                      {p.name.split(' ').map((n: string) => n[0]).join('')}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="block font-bold text-xs truncate text-text">{p.name}</span>
+                      <span className="block text-[9px] text-muted-foreground truncate font-semibold">Parent of {p.childName}</span>
+                    </div>
+                  </button>
+                ))}
+                {parentList.length === 0 && (
+                  <p className="text-center text-xs text-muted py-6">No parents registered in your department.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column: Chat Box */}
+            <div className="flex-1 bg-surface border border-border rounded-2xl p-5 flex flex-col shadow-sm h-full justify-between">
+              {selectedParentId ? (
+                <>
+                  {/* Header */}
+                  <div className="pb-3 border-b border-border/40 flex items-center justify-between">
+                    <div>
+                      <span className="block font-extrabold text-sm text-text">
+                        {parentList.find(p => p.profile_id === selectedParentId)?.name || 'Parent Chat'}
+                      </span>
+                      <span className="block text-[9px] text-primary font-bold uppercase tracking-wider">
+                        Active Channel: Student HOD/Advisor
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Messages List */}
+                  <div className="flex-1 overflow-y-auto py-4 space-y-3 pr-1 text-xs my-2 min-h-[250px] max-h-[450px]">
+                    {parentMessages.map((msg, idx) => (
+                      <div
+                        key={idx}
+                        className={`p-3 rounded-xl max-w-[80%] leading-relaxed ${
+                          msg.sender_role === 'faculty' || msg.sender === 'faculty'
+                            ? 'bg-primary text-primary-foreground ml-auto animate-fadeIn'
+                            : 'bg-background border border-border animate-fadeIn'
+                        }`}
+                      >
+                        <p className="font-medium">{msg.text}</p>
+                        <span className="block text-[8px] text-muted-foreground mt-1 text-right">
+                          {new Date(msg.time).toLocaleTimeString()}
+                        </span>
+                      </div>
+                    ))}
+                    {parentMessages.length === 0 && (
+                      <p className="text-center text-xs text-muted py-12">No communication history found. Send a message to start conversation.</p>
+                    )}
+                  </div>
+
+                  {/* Message Form Input */}
+                  <form onSubmit={handleSendParentMessage} className="relative mt-2">
+                    <input
+                      type="text"
+                      placeholder="Send an official advisor response to parent..."
+                      value={parentMsgText}
+                      onChange={(e) => setParentMsgText(e.target.value)}
+                      className="w-full pl-3 pr-10 py-2.5 border border-border bg-background rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all"
+                    />
+                    <button
+                      type="submit"
+                      className="absolute right-1.5 top-2 p-1.5 rounded-lg bg-primary text-primary-foreground hover:opacity-90"
+                    >
+                      <Send size={12} />
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-center text-muted gap-2 py-16">
+                  <MessageSquare size={32} className="text-muted-foreground animate-pulse" />
+                  <span className="text-xs font-bold">Select a parent chat to start messaging</span>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1009,6 +1195,12 @@ export default function FacultyDashboard() {
                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'approvals' ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-accent'}`}
                 >
                   <CheckCircle size={16} /> Approvals Desk
+                </button>
+                <button 
+                  onClick={() => { setActiveTab('messages'); setMobileMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'messages' ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-accent'}`}
+                >
+                  <MessageSquare size={16} /> Parent Chats
                 </button>
               </nav>
             </div>

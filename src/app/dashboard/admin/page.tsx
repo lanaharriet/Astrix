@@ -620,7 +620,7 @@ export default function AdminDashboard() {
 
         {/* 1. ANALYTICS & SETTINGS */}
         {activeTab === 'analytics' && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fadeIn">
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <div className="p-5 bg-surface border border-border rounded-2xl shadow-sm text-center">
@@ -936,7 +936,7 @@ export default function AdminDashboard() {
 
         {/* 2. USER MANAGER */}
         {activeTab === 'users' && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fadeIn">
             <div className="grid md:grid-cols-3 gap-8 items-start">
               {/* Add User Console */}
               <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
@@ -1023,7 +1023,7 @@ export default function AdminDashboard() {
 
         {/* 3. BULK CSV OPERATIONS */}
         {activeTab === 'csv' && (
-          <div className="space-y-8 max-w-4xl">
+          <div className="space-y-8 max-w-4xl animate-fadeIn">
             <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
               <h3 className="font-bold text-base flex items-center gap-2"><Upload size={18} className="text-primary" /> Bulk Student CSV Import</h3>
               <p className="text-xs text-muted">Paste CSV rows directly. Format requirement: <strong>Name, Email, RegisterNumber</strong> (one row per student).</p>
@@ -1060,7 +1060,7 @@ export default function AdminDashboard() {
 
         {/* 4. ACADEMIC GOVERNANCE */}
         {activeTab === 'governance' && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fadeIn">
             {/* Semester Promotion Trigger */}
             <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4 max-w-2xl">
               <h3 className="font-bold text-base flex items-center gap-2"><RefreshCw size={18} className="text-primary" /> Global Semester Promotion</h3>
@@ -1113,7 +1113,7 @@ export default function AdminDashboard() {
 
         {/* 5. PUBLISHING BOARD */}
         {activeTab === 'notices' && (
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fadeIn">
             <div className="grid md:grid-cols-2 gap-8">
               {/* Notice board publish */}
               <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
@@ -1221,7 +1221,7 @@ export default function AdminDashboard() {
 
         {/* 6. AUDIT LOGS */}
         {activeTab === 'audit' && (
-          <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4">
+          <div className="p-6 rounded-2xl border border-border bg-surface shadow-sm space-y-4 animate-fadeIn">
             <h3 className="font-bold text-base flex items-center gap-2"><Activity size={18} className="text-primary" /> Audit Logs & Security Trails</h3>
             <p className="text-xs text-muted">Real-time log of administrative database mutations and operations.</p>
             
