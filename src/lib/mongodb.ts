@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
+import { validateEnv } from './env-validator';
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  // We'll log a warning, but during build time or before the user configures it, we shouldn't throw an uncatchable exception
-  console.warn('Warning: MONGODB_URI is not defined in .env.local');
+  // Log warning via our env validator
+  validateEnv();
 }
 
 interface MongooseCache {
@@ -20,6 +21,7 @@ if (!cached) {
 }
 
 export default async function dbConnect() {
+  validateEnv();
   const uri = process.env.MONGODB_URI;
   if (!uri) {
     throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
@@ -32,6 +34,8 @@ export default async function dbConnect() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
     };
 
     cached.promise = mongoose.connect(uri, opts).then((mongooseInstance) => {

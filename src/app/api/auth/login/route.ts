@@ -4,16 +4,39 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import { getModelByTable } from '@/lib/models';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+import { logAuditEvent } from '@/lib/audit';
 import { isMongoConfigured, getDbRecords } from '@/lib/db-server';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'astrix-super-secret-key-12345';
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
   try {
+    // 1. IP Rate Limiting: 10 attempts / 15 minutes
+    const ip = getClientIp(request);
+    const isAllowed = checkRateLimit(ip, 10, 900000);
+    if (!isAllowed) {
+      await logAuditEvent(null, 'security_rate_limit_violation', 'FAILED', ip, { endpoint: '/api/auth/login' });
+      return NextResponse.json(
+        { error: 'Too Many Requests: Rate limit exceeded. Please try again after 15 minutes.' },
+        { status: 429 }
+      );
+    }
+
     const { email, password } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
+    }
+
+    // 2. Input Validation
+    if (!EMAIL_REGEX.test(email)) {
+      return NextResponse.json({ error: 'Validation Error: Invalid email format' }, { status: 400 });
+    }
+
+    if (password.length < 8) {
+      return NextResponse.json({ error: 'Validation Error: Password must be at least 8 characters' }, { status: 400 });
     }
 
     let user: any = null;
@@ -30,6 +53,7 @@ export async function POST(request: Request) {
     }
 
     if (!user) {
+      await logAuditEvent(null, 'auth_login', 'FAILED', ip, { email, reason: 'Email not registered' });
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
@@ -45,6 +69,7 @@ export async function POST(request: Request) {
     }
 
     if (!isPasswordValid) {
+      await logAuditEvent(null, 'auth_login', 'FAILED', ip, { email, reason: 'Incorrect password' });
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
@@ -63,7 +88,7 @@ export async function POST(request: Request) {
     const token = jwt.sign(
       { id: profile.id, email: profile.email, role: profile.role },
       JWT_SECRET,
-      { expiresIn: '1d' }
+      { expiresIn: '7d' }
     );
 
     // Set cookie
@@ -71,21 +96,25 @@ export async function POST(request: Request) {
     cookieStore.set('astrix-token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       path: '/',
-      maxAge: 86400 // 1 day
+      maxAge: 7 * 24 * 60 * 60 // 7 days
     });
 
     const cookieVal = encodeURIComponent(JSON.stringify(profile));
     cookieStore.set('astrix-user-session', cookieVal, {
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       path: '/',
-      maxAge: 86400 // 1 day
+      maxAge: 7 * 24 * 60 * 60 // 7 days
     });
+
+    await logAuditEvent(profile.id, 'auth_login', 'SUCCESS', ip, { email: profile.email });
 
     return NextResponse.json(profile);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure('/api/auth/login', error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }

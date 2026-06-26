@@ -32,7 +32,9 @@ import {
   X,
   Sun,
   Moon,
-  MessageSquare
+  MessageSquare,
+  Copy,
+  RefreshCw
 } from 'lucide-react';
 
 export default function FacultyDashboard() {
@@ -53,6 +55,8 @@ export default function FacultyDashboard() {
     { role: 'assistant', content: 'Welcome Dr. Turing. I am your Faculty Copilot. I can assist with syllabus status, student grades calculation, or drafting notices.' }
   ]);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [chatError, setChatError] = useState(false);
 
   // Parent Chat States
   const [parentList, setParentList] = useState<any[]>([]);
@@ -269,36 +273,75 @@ export default function FacultyDashboard() {
     }
   };
 
-  // AI Copilot chat
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!chatInput.trim()) return;
+  // Streaming-like text rendering simulation
+  const simulateStreaming = (text: string, onComplete?: () => void) => {
+    setIsStreaming(true);
+    let currentText = '';
+    const words = text.split(' ');
+    let i = 0;
+    
+    setChatMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+    
+    const interval = setInterval(() => {
+      if (i < words.length) {
+        currentText += (i === 0 ? '' : ' ') + words[i];
+        setChatMessages(prev => {
+          const next = [...prev];
+          next[next.length - 1] = { role: 'assistant', content: currentText };
+          return next;
+        });
+        i++;
+      } else {
+        clearInterval(interval);
+        setIsStreaming(false);
+        if (onComplete) onComplete();
+      }
+    }, 25);
+  };
 
-    const userMsg = { role: 'user', content: chatInput };
-    setChatMessages(prev => [...prev, userMsg]);
-    setChatInput('');
+  // AI Copilot chat
+  const handleSendMessage = async (e?: React.FormEvent, retryPrompt?: string) => {
+    if (e) e.preventDefault();
+    
+    const prompt = retryPrompt !== undefined ? retryPrompt : chatInput;
+    if (!prompt.trim() || isAiLoading || isStreaming) return;
+
+    if (retryPrompt === undefined) {
+      const userMsg = { role: 'user', content: prompt };
+      setChatMessages(prev => [...prev, userMsg]);
+      setChatInput('');
+    }
+    
     setIsAiLoading(true);
+    setChatError(false);
 
     try {
+      const historyToSend = retryPrompt !== undefined
+        ? chatMessages
+        : [...chatMessages, { role: 'user', content: prompt }];
+
       const response = await fetch('/api/ai/copilot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...chatMessages, userMsg],
+          messages: historyToSend,
           userId: currentUser?.id
         })
       });
 
       const data = await response.json();
+      setIsAiLoading(false);
+
       if (data.response) {
-        setChatMessages(prev => [...prev, { role: 'assistant', content: data.response }]);
+        simulateStreaming(data.response);
       } else {
-        setChatMessages(prev => [...prev, { role: 'assistant', content: 'Error getting feedback.' }]);
+        setChatMessages(prev => [...prev, { role: 'assistant', content: 'Campus Copilot is temporarily unavailable.' }]);
+        setChatError(true);
       }
     } catch (error) {
-      setChatMessages(prev => [...prev, { role: 'assistant', content: 'Connection error.' }]);
-    } finally {
       setIsAiLoading(false);
+      setChatMessages(prev => [...prev, { role: 'assistant', content: 'Campus Copilot is temporarily unavailable.' }]);
+      setChatError(true);
     }
   };
 
@@ -1107,35 +1150,96 @@ export default function FacultyDashboard() {
 
           <div className="flex-1 overflow-y-auto py-4 space-y-3 pr-1 text-xs">
             {chatMessages.map((msg, idx) => (
-              <div 
-                key={idx} 
-                className={`p-3 rounded-xl max-w-[85%] leading-relaxed ${
-                  msg.role === 'user' 
-                    ? 'bg-primary text-primary-foreground ml-auto' 
-                    : 'bg-background border border-border'
-                }`}
-              >
-                <span className="whitespace-pre-line font-medium">{msg.content}</span>
+              <div key={idx} className="space-y-1">
+                <div 
+                  className={`p-3 rounded-xl max-w-[85%] leading-relaxed relative group ${
+                    msg.role === 'user' 
+                      ? 'bg-primary text-primary-foreground ml-auto' 
+                      : 'bg-background border border-border'
+                  }`}
+                >
+                  <span className="whitespace-pre-line font-medium">{msg.content}</span>
+                  
+                  {/* Action buttons (copy & regenerate) for assistant bubbles */}
+                  {msg.role === 'assistant' && !isStreaming && msg.content && (
+                    <div className="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity justify-end border-t border-border/30 pt-1.5">
+                      <button 
+                        onClick={() => {
+                          navigator.clipboard.writeText(msg.content);
+                          alert('Copied response to clipboard!');
+                        }}
+                        className="p-1.5 rounded hover:bg-accent/40 text-[10px] text-muted flex items-center gap-0.5 cursor-pointer"
+                        title="Copy message"
+                      >
+                        <Copy size={10} /> Copy
+                      </button>
+                      {idx > 0 && (
+                        <button 
+                          onClick={() => {
+                            const prevUserMsg = chatMessages[idx - 1];
+                            if (prevUserMsg && prevUserMsg.role === 'user') {
+                              setChatMessages(prev => prev.slice(0, idx));
+                              handleSendMessage(undefined, prevUserMsg.content);
+                            }
+                          }}
+                          className="p-1.5 rounded hover:bg-accent/40 text-[10px] text-muted flex items-center gap-0.5 cursor-pointer"
+                          title="Regenerate response"
+                        >
+                          <RefreshCw size={10} /> Retry
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
+            
+            {/* Loading Skeleton + Typing indicator dot animation */}
             {isAiLoading && (
-              <div className="bg-background border border-border p-3 rounded-xl max-w-[85%] flex items-center gap-2 text-muted">
-                <Loader2 size={12} className="animate-spin" /> Fetching model context...
+              <div className="bg-background border border-border p-3 rounded-xl max-w-[85%] space-y-2 animate-pulse">
+                <div className="h-3 bg-muted/60 rounded w-3/4" />
+                <div className="h-3 bg-muted/60 rounded w-1/2" />
+                <div className="h-3 bg-muted/60 rounded w-5/6" />
+                <div className="flex items-center gap-1 mt-1">
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
+            )}
+
+            {/* Error UI with Retry option */}
+            {chatError && (
+              <div className="p-3 bg-red-500/10 text-red-500 rounded-xl border border-red-500/20 text-xs font-semibold space-y-2">
+                <p>Campus Copilot is temporarily unavailable.</p>
+                <button 
+                  onClick={() => {
+                    const lastUser = [...chatMessages].reverse().find(m => m.role === 'user');
+                    if (lastUser) {
+                      handleSendMessage(undefined, lastUser.content);
+                    }
+                  }}
+                  className="px-2.5 py-1 bg-red-500 text-white rounded-lg text-[10px] font-bold hover:bg-red-600 transition-colors cursor-pointer"
+                >
+                  Retry Connection
+                </button>
               </div>
             )}
           </div>
 
-          <form onSubmit={handleSendMessage} className="relative mt-2">
+          <form onSubmit={(e) => handleSendMessage(e)} className="relative mt-2">
             <input
               type="text"
-              placeholder="Ask Copilot for text templates..."
+              placeholder={isAiLoading || isStreaming ? "Analyzing..." : "Ask Copilot for text templates..."}
               value={chatInput}
+              disabled={isAiLoading || isStreaming}
               onChange={(e) => setChatInput(e.target.value)}
-              className="w-full pl-3 pr-10 py-2 border border-border bg-background rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent"
+              className="w-full pl-3 pr-10 py-2 border border-border bg-background rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all disabled:opacity-55"
             />
             <button 
               type="submit" 
-              className="absolute right-1.5 top-1.5 p-1 rounded-lg bg-primary text-primary-foreground hover:opacity-90"
+              disabled={isAiLoading || isStreaming}
+              className="absolute right-1.5 top-1.5 p-1 rounded-lg bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50"
               aria-label="Send message"
             >
               <Send size={12} />

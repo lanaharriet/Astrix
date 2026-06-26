@@ -53,6 +53,8 @@ export async function GET() {
 
     return NextResponse.json(profile);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure('/api/auth/me', error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }

@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: user.email,
           role: user.role,
         }));
-        document.cookie = `astrix-user-session=${cookieVal}; path=/; max-age=86400; SameSite=Lax`;
+        document.cookie = `astrix-user-session=${cookieVal}; path=/; max-age=604800; SameSite=Strict`;
       } else {
         document.cookie = 'astrix-user-session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
       }

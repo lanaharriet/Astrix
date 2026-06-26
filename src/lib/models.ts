@@ -352,11 +352,19 @@ ActivityLogSchema.virtual('id').get(function() { return this._id; }).set(functio
 // 31. AuditLog Model
 const AuditLogSchema = new Schema({
   _id: { type: String, default: () => new mongoose.Types.ObjectId().toString() },
-  user_id: { type: String, required: true },
-  table_name: { type: String, required: true },
-  action: { type: String, required: true },
+  // Existing fields for backward compatibility with generic table router
+  user_id: { type: String },
+  table_name: { type: String },
   old_data: { type: Schema.Types.Mixed },
-  new_data: { type: Schema.Types.Mixed }
+  new_data: { type: Schema.Types.Mixed },
+  
+  // New enterprise audit fields
+  userId: { type: String },
+  action: { type: String, required: true },
+  status: { type: String },
+  ipAddress: { type: String },
+  metadata: { type: Schema.Types.Mixed },
+  timestamp: { type: Date, default: Date.now }
 }, baseSchemaOptions);
 AuditLogSchema.virtual('id').get(function() { return this._id; }).set(function(v) { this._id = v; });
 

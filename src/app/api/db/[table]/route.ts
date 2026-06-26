@@ -7,6 +7,8 @@ import {
   updateDbRecord, 
   deleteDbRecord 
 } from '@/lib/db-server';
+import { getClientIp } from '@/lib/rate-limit';
+import { logAuditEvent } from '@/lib/audit';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'astrix-super-secret-key-12345';
 
@@ -65,8 +67,10 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ table: string }> }
 ) {
+  let tableName = 'unknown';
   try {
     const { table } = await params;
+    tableName = table;
     const { searchParams } = new URL(request.url);
     let records = await getDbRecords(table);
 
@@ -80,7 +84,9 @@ export async function GET(
 
     return NextResponse.json(records);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure(`/api/db/${tableName} (GET)`, error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }
 
@@ -89,13 +95,23 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ table: string }> }
 ) {
+  let tableName = 'unknown';
   try {
     const { table } = await params;
+    tableName = table;
     
     // RBAC Security Check
     if (table === 'departments') {
       const isAdmin = await verifyAdmin();
       if (!isAdmin) {
+        const ip = getClientIp(request);
+        let userId = 'system';
+        try {
+          const cookieStore = await cookies();
+          const userSession = cookieStore.get('astrix-user-session')?.value;
+          if (userSession) userId = JSON.parse(decodeURIComponent(userSession)).id;
+        } catch (e) {}
+        await logAuditEvent(userId, 'security_unauthorized_access', 'FAILED', ip, { endpoint: `/api/db/${table}`, method: 'POST' });
         return NextResponse.json({ error: 'Forbidden: Admin role required' }, { status: 403 });
       }
     }
@@ -110,7 +126,9 @@ export async function POST(
 
     return NextResponse.json(newRecord, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure(`/api/db/${tableName} (POST)`, error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }
 
@@ -119,8 +137,10 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ table: string }> }
 ) {
+  let tableName = 'unknown';
   try {
     const { table } = await params;
+    tableName = table;
     const { searchParams } = new URL(request.url);
     const body = await request.json();
     
@@ -134,6 +154,14 @@ export async function PUT(
     if (table === 'departments') {
       const isAdmin = await verifyAdmin();
       if (!isAdmin) {
+        const ip = getClientIp(request);
+        let userId = 'system';
+        try {
+          const cookieStore = await cookies();
+          const userSession = cookieStore.get('astrix-user-session')?.value;
+          if (userSession) userId = JSON.parse(decodeURIComponent(userSession)).id;
+        } catch (e) {}
+        await logAuditEvent(userId, 'security_unauthorized_access', 'FAILED', ip, { endpoint: `/api/db/${table}`, method: 'PUT' });
         return NextResponse.json({ error: 'Forbidden: Admin role required' }, { status: 403 });
       }
     }
@@ -157,7 +185,9 @@ export async function PUT(
 
     return NextResponse.json(updatedRecord);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure(`/api/db/${tableName} (PUT)`, error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }
 
@@ -166,8 +196,10 @@ export async function DELETE(
   request: Request,
   { params }: { params: Promise<{ table: string }> }
 ) {
+  let tableName = 'unknown';
   try {
     const { table } = await params;
+    tableName = table;
     const { searchParams } = new URL(request.url);
     
     const id = searchParams.get('id') || searchParams.get('profile_id');
@@ -179,6 +211,14 @@ export async function DELETE(
     if (table === 'departments') {
       const isAdmin = await verifyAdmin();
       if (!isAdmin) {
+        const ip = getClientIp(request);
+        let userId = 'system';
+        try {
+          const cookieStore = await cookies();
+          const userSession = cookieStore.get('astrix-user-session')?.value;
+          if (userSession) userId = JSON.parse(decodeURIComponent(userSession)).id;
+        } catch (e) {}
+        await logAuditEvent(userId, 'security_unauthorized_access', 'FAILED', ip, { endpoint: `/api/db/${table}`, method: 'DELETE' });
         return NextResponse.json({ error: 'Forbidden: Admin role required' }, { status: 403 });
       }
     }
@@ -202,6 +242,8 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure(`/api/db/${tableName} (DELETE)`, error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }

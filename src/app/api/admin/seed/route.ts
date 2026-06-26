@@ -9,7 +9,7 @@ export async function POST() {
   try {
     const isMongo = isMongoConfigured();
     const defaultPassword = 'Password123!';
-    const hashedPassword = await bcrypt.hash(defaultPassword, 10);
+    const hashedPassword = await bcrypt.hash(defaultPassword, 12);
 
     // Prepare seeded profiles with password
     const seededProfiles = seed.SEED_PROFILES.map((profile) => ({
@@ -435,6 +435,8 @@ export async function POST() {
       message: 'Local database reset and seeded successfully.',
     });
   } catch (error: any) {
-    return NextResponse.json({ status: 'error', message: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure('/api/admin/seed', error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }

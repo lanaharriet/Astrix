@@ -149,7 +149,7 @@ function LoginPanel() {
           const profile = profiles[0];
           if (profile) {
             localStorage.setItem('astrix-user', JSON.stringify(profile));
-            document.cookie = `astrix-user-session=${encodeURIComponent(JSON.stringify(profile))}; path=/; max-age=86400; SameSite=Lax`;
+            document.cookie = `astrix-user-session=${encodeURIComponent(JSON.stringify(profile))}; path=/; max-age=604800; SameSite=Strict`;
             router.push(`/dashboard/${selectedRole}`);
           } else {
             const defaultProfile = {
@@ -159,7 +159,7 @@ function LoginPanel() {
               role: selectedRole
             };
             localStorage.setItem('astrix-user', JSON.stringify(defaultProfile));
-            document.cookie = `astrix-user-session=${encodeURIComponent(JSON.stringify(defaultProfile))}; path=/; max-age=86400; SameSite=Lax`;
+            document.cookie = `astrix-user-session=${encodeURIComponent(JSON.stringify(defaultProfile))}; path=/; max-age=604800; SameSite=Strict`;
             router.push(`/dashboard/${selectedRole}`);
           }
         }

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { queryGroq } from '@/lib/groq';
 import { insertDbRecord } from '@/lib/db-server';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+import { logAuditEvent } from '@/lib/audit';
+import { trackApiFailure } from '@/lib/monitor';
 
 const RESUME_SYSTEM_PROMPT = `You are the ASTRIX AI Resume Expert. Your job is to analyze resumes of college students and provide structured feedback.
 You must analyze the text and output a JSON object containing the following keys:
@@ -12,20 +15,72 @@ You must analyze the text and output a JSON object containing the following keys
 
 Provide ONLY the raw JSON block. Do not wrap it in markdown tags or write introductory text. Ensure it is valid, parseable JSON.`;
 
-export async function POST(request: Request) {
-  try {
-    const { resumeText, studentId } = await request.json();
+// Pre-defined safe validation fallback JSON
+const SAFE_FALLBACK_JSON = {
+  score: 75,
+  strengths: ["Unable to analyze fully"],
+  weaknesses: ["AI response malformed"],
+  recommendations: ["Retry analysis"]
+};
 
-    if (!resumeText) {
-      return NextResponse.json({ error: 'No resume text provided' }, { status: 400 });
+// Input Sanitization helper
+function sanitizeInput(text: string): string {
+  // Strip HTML elements and scripts
+  let sanitized = text.replace(/<[^>]*>/g, '');
+  sanitized = sanitized.replace(/javascript:/gi, '');
+  // Limit to max 8000 characters to prevent overflow and system stress
+  if (sanitized.length > 8000) {
+    sanitized = sanitized.substring(0, 8000);
+  }
+  return sanitized.trim();
+}
+
+export async function POST(request: Request) {
+  let ip = '127.0.0.1';
+  let studentIdVal: string | null = null;
+  try {
+    ip = getClientIp(request);
+    const body = await request.json();
+    const { resumeText, studentId } = body;
+    studentIdVal = studentId || null;
+
+    // 1. IP Rate Limiting: 5 requests / minute
+    const isAllowed = checkRateLimit(ip, 5, 60000);
+    if (!isAllowed) {
+      await logAuditEvent(studentIdVal, 'security_rate_limit_violation', 'FAILED', ip, { endpoint: '/api/ai/analyze-resume' });
+      return NextResponse.json(
+        { error: 'Too Many Requests: Rate limit exceeded (5 requests/minute)' },
+        { status: 429 }
+      );
     }
+
+    // 2. Input Validation
+    if (!resumeText || typeof resumeText !== 'string') {
+      return NextResponse.json({ error: 'Validation Error: No resume text provided' }, { status: 400 });
+    }
+
+    const sanitizedText = sanitizeInput(resumeText);
+    if (!sanitizedText) {
+      return NextResponse.json({ error: 'Validation Error: Resume text contains invalid characters' }, { status: 400 });
+    }
+
+    const sanitizedStudentId = studentId && typeof studentId === 'string' 
+      ? studentId.replace(/[^\w-]/g, '').substring(0, 50) 
+      : null;
 
     const messages = [
       { role: 'system' as const, content: RESUME_SYSTEM_PROMPT },
-      { role: 'user' as const, content: `Analyze the following resume:\n\n${resumeText}` }
+      { role: 'user' as const, content: `Analyze the following resume:\n\n${sanitizedText}` }
     ];
 
-    const aiResponse = await queryGroq(messages, 0.2);
+    let aiResponse = '';
+    try {
+      aiResponse = await queryGroq(messages, 0.2);
+    } catch (groqErr: any) {
+      console.warn('Groq query failed in resume analyze endpoint:', groqErr.message);
+      await logAuditEvent(studentIdVal, 'ai_request_resume_analysis', 'FAILED', ip, { error: groqErr.message, fallback: true });
+      return NextResponse.json(SAFE_FALLBACK_JSON);
+    }
     
     // Clean up response if the model returned markdown ticks
     let cleanJson = aiResponse.trim();
@@ -37,32 +92,37 @@ export async function POST(request: Request) {
     }
     cleanJson = cleanJson.trim();
 
-    let parsedResult;
+    let parsedResult: any;
+    let isValid = true;
     try {
       parsedResult = JSON.parse(cleanJson);
+      
+      // Enforce validation criteria
+      if (
+        typeof parsedResult.score !== 'number' ||
+        !Array.isArray(parsedResult.strengths) ||
+        !Array.isArray(parsedResult.weaknesses) ||
+        !Array.isArray(parsedResult.skill_gaps) ||
+        !Array.isArray(parsedResult.recommendations)
+      ) {
+        isValid = false;
+      }
     } catch (parseErr) {
-      console.warn('Failed to parse Groq resume analysis JSON, using semantic fallback parser:', parseErr);
-      // Fallback parser if JSON fails
-      parsedResult = {
-        score: 75,
-        strengths: ["Clean resume structure", "Good list of programming languages"],
-        weaknesses: ["Missing quantitative project metrics", "Sparsely detailed project descriptions"],
-        skill_gaps: ["System Design", "Unit Testing (Jest)", "Docker / Containerization", "CI/CD Pipelines"],
-        recommendations: [
-          "Include bullet points starting with strong action verbs.",
-          "Add quantitative metrics (e.g., 'reduced load times by 25%').",
-          "Add a projects section highlighting full-stack architectures."
-        ]
-      };
+      isValid = false;
     }
 
-    // Persist this analysis in the database under resume_uploads
-    if (studentId) {
+    if (!isValid) {
+      console.warn('[ASTRIX SYSTEM WARNING] AI response failed schema validation. Returning safe fallback JSON.');
+      parsedResult = SAFE_FALLBACK_JSON;
+    }
+
+    // Persist in database if studentId is provided
+    if (sanitizedStudentId) {
       try {
         await insertDbRecord('resume_uploads', {
-          student_id: studentId,
+          student_id: sanitizedStudentId,
           file_url: '/uploads/resumes/latest_uploaded.pdf',
-          parsed_content_json: { text: resumeText.substring(0, 1000) },
+          parsed_content_json: { text: sanitizedText.substring(0, 1000) },
           score: parsedResult.score,
           analysis_json: parsedResult,
         });
@@ -71,8 +131,15 @@ export async function POST(request: Request) {
       }
     }
 
+    await logAuditEvent(studentIdVal, 'ai_request_resume_analysis', 'SUCCESS', ip, { score: parsedResult.score });
+
     return NextResponse.json(parsedResult);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    trackApiFailure('/api/ai/analyze-resume', error);
+    await logAuditEvent(studentIdVal, 'ai_request_resume_analysis', 'FAILED', ip, { error: error.message });
+    return NextResponse.json({
+      success: false,
+      message: 'Something went wrong. Please try again later.'
+    }, { status: 500 });
   }
 }

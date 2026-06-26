@@ -5,11 +5,14 @@ import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import { getModelByTable } from '@/lib/models';
 import { isMongoConfigured, updateDbRecord } from '@/lib/db-server';
+import { getClientIp } from '@/lib/rate-limit';
+import { logAuditEvent } from '@/lib/audit';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'astrix-super-secret-key-12345';
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
     const cookieStore = await cookies();
     const token = cookieStore.get('astrix-token')?.value;
 
@@ -29,7 +32,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Password is required' }, { status: 400 });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
     if (isMongoConfigured()) {
       await dbConnect();
@@ -41,18 +44,24 @@ export async function POST(request: Request) {
           { new: true }
         );
         if (!updatedUser) {
+          await logAuditEvent(payload.id, 'auth_password_change', 'FAILED', ip, { reason: 'User not found in MongoDB' });
           return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
       }
     } else {
       const success = await updateDbRecord('profiles', payload.id, { password: hashedPassword });
       if (!success) {
+        await logAuditEvent(payload.id, 'auth_password_change', 'FAILED', ip, { reason: 'User not found in local DB' });
         return NextResponse.json({ error: 'User not found' }, { status: 404 });
       }
     }
 
+    await logAuditEvent(payload.id, 'auth_password_change', 'SUCCESS', ip);
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure('/api/auth/update-password', error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }

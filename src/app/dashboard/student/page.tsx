@@ -1067,75 +1067,81 @@ PROJECTS
                 <p className="text-xs text-muted">A detailed subject breakdown with real-time warning indicators and advisory notes.</p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8">
-                {/* Visual Chart Panel */}
-                <div className="space-y-5">
-                  {subjectAttendanceStats.map((sub, idx) => (
-                    <div key={idx} className="space-y-2">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="font-bold text-text">{sub.name}</span>
-                        <span className="font-bold" style={{ color: sub.color }}>
-                          {sub.present}/{sub.total} ({sub.percentage}%)
-                        </span>
-                      </div>
-                      
-                      <div className="h-3 w-full bg-background border border-border/50 rounded-full overflow-hidden relative">
-                        <div 
-                          className="h-full rounded-full transition-all duration-500 ease-out"
-                          style={{ 
-                            width: `${sub.percentage}%`,
-                            backgroundColor: sub.color,
-                            boxShadow: `0 0 8px ${sub.color}50`
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ))}
+              {subjectAttendanceStats.length === 0 ? (
+                <div className="p-8 border border-dashed border-border rounded-xl text-center text-muted font-bold text-xs">
+                  No attendance records available.
                 </div>
-
-                {/* AI Suggestions Panel */}
-                <div className="p-4 bg-background border border-border/50 rounded-xl space-y-4">
-                  <div className="flex items-center gap-2 border-b border-border/30 pb-2">
-                    <Sparkles size={16} className="text-[#d4a017] animate-pulse" />
-                    <span className="text-xs font-extrabold uppercase text-[#d4a017] tracking-wider">AI Copilot Attendance Recommendations</span>
-                  </div>
-                  
-                  <div className="space-y-3.5 max-h-[260px] overflow-y-auto pr-1">
-                    {subjectAttendanceStats.map((sub, idx) => {
-                      let tip = "";
-                      let statusType: 'safe' | 'warning' | 'danger' = 'safe';
-                      if (sub.percentage >= 85) {
-                        const skipCount = Math.max(0, Math.floor((sub.present - 0.75 * sub.total) / 0.75));
-                        tip = skipCount > 0 
-                          ? `Excellent standing! You can safely miss up to ${skipCount} class${skipCount > 1 ? 'es' : ''} in ${sub.name} if required.` 
-                          : `Strong standing in ${sub.name}. Keep it up to maintain your high-grade eligibility.`;
-                        statusType = 'safe';
-                      } else if (sub.percentage >= 75) {
-                        tip = `Caution: Attendance is at ${sub.percentage}%. Avoid missing any classes in ${sub.name} this week to prevent falling into shortage danger.`;
-                        statusType = 'warning';
-                      } else {
-                        const needCount = Math.ceil((0.75 * sub.total - sub.present) / 0.25);
-                        tip = `Shortage alert! You must attend the next ${needCount} consecutive lectures in ${sub.name} to restore your attendance to 75%.`;
-                        statusType = 'danger';
-                      }
-                      
-                      return (
-                        <div key={idx} className="flex gap-2.5 items-start text-xs border-b border-border/10 pb-2.5 last:border-0 last:pb-0">
-                          <span className="mt-0.5">
-                            {statusType === 'safe' && <CheckCircle size={14} className="text-success" />}
-                            {statusType === 'warning' && <AlertTriangle size={14} className="text-amber-500" />}
-                            {statusType === 'danger' && <AlertTriangle size={14} className="text-red-500 animate-bounce" />}
+              ) : (
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* Visual Chart Panel */}
+                  <div className="space-y-5">
+                    {subjectAttendanceStats.map((sub, idx) => (
+                      <div key={idx} className="space-y-2">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="font-bold text-text">{sub.name}</span>
+                          <span className="font-bold" style={{ color: sub.color }}>
+                            {sub.present}/{sub.total} ({sub.percentage}%)
                           </span>
-                          <div>
-                            <span className="font-bold text-text block text-[11px]">{sub.name} Advisor</span>
-                            <p className="text-muted text-[11px] leading-relaxed mt-0.5">{tip}</p>
-                          </div>
                         </div>
-                      );
-                    })}
+                        
+                        <div className="h-3 w-full bg-background border border-border/50 rounded-full overflow-hidden relative">
+                          <div 
+                            className="h-full rounded-full transition-all duration-500 ease-out"
+                            style={{ 
+                              width: `${sub.percentage}%`,
+                              backgroundColor: sub.color,
+                              boxShadow: `0 0 8px ${sub.color}50`
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* AI Suggestions Panel */}
+                  <div className="p-4 bg-background border border-border/50 rounded-xl space-y-4">
+                    <div className="flex items-center gap-2 border-b border-border/30 pb-2">
+                      <Sparkles size={16} className="text-[#d4a017] animate-pulse" />
+                      <span className="text-xs font-extrabold uppercase text-[#d4a017] tracking-wider">AI Copilot Attendance Recommendations</span>
+                    </div>
+                    
+                    <div className="space-y-3.5 max-h-[260px] overflow-y-auto pr-1">
+                      {subjectAttendanceStats.map((sub, idx) => {
+                        let tip = "";
+                        let statusType: 'safe' | 'warning' | 'danger' = 'safe';
+                        if (sub.percentage >= 85) {
+                          const skipCount = Math.max(0, Math.floor((sub.present - 0.75 * sub.total) / 0.75));
+                          tip = skipCount > 0 
+                            ? `Excellent standing! You can safely miss up to ${skipCount} class${skipCount > 1 ? 'es' : ''} in ${sub.name} if required.` 
+                            : `Strong standing in ${sub.name}. Keep it up to maintain your high-grade eligibility.`;
+                          statusType = 'safe';
+                        } else if (sub.percentage >= 75) {
+                          tip = `Caution: Attendance is at ${sub.percentage}%. Avoid missing any classes in ${sub.name} this week to prevent falling into shortage danger.`;
+                          statusType = 'warning';
+                        } else {
+                          const needCount = Math.ceil((0.75 * sub.total - sub.present) / 0.25);
+                          tip = `Shortage alert! You must attend the next ${needCount} consecutive lectures in ${sub.name} to restore your attendance to 75%.`;
+                          statusType = 'danger';
+                        }
+                        
+                        return (
+                          <div key={idx} className="flex gap-2.5 items-start text-xs border-b border-border/10 pb-2.5 last:border-0 last:pb-0">
+                            <span className="mt-0.5">
+                              {statusType === 'safe' && <CheckCircle size={14} className="text-success" />}
+                              {statusType === 'warning' && <AlertTriangle size={14} className="text-amber-500" />}
+                              {statusType === 'danger' && <AlertTriangle size={14} className="text-red-500 animate-bounce" />}
+                            </span>
+                            <div>
+                              <span className="font-bold text-text block text-[11px]">{sub.name} Advisor</span>
+                              <p className="text-muted text-[11px] leading-relaxed mt-0.5">{tip}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}

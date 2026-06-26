@@ -29,6 +29,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, message: 'Password reset link sent to your email.' });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure('/api/auth/reset-password', error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }

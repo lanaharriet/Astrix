@@ -4,30 +4,34 @@ import jwt from 'jsonwebtoken';
 import dbConnect from '@/lib/mongodb';
 import { getModelByTable } from '@/lib/models';
 import { isMongoConfigured, getDbRecords, insertDbRecord, updateDbRecord, deleteDbRecord } from '@/lib/db-server';
+import { getClientIp } from '@/lib/rate-limit';
+import { logAuditEvent } from '@/lib/audit';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'astrix-super-secret-key-12345';
 
-// Helper to verify admin
-async function verifyAdmin() {
+// Helper to verify admin and get requester details
+async function getRequester(request: Request) {
+  const ip = getClientIp(request);
+  let userId = null;
+  let isAdmin = false;
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('astrix-token')?.value;
     
-    if (!token) {
-      // Fallback for mock mode check via astrix-user-session cookie
+    if (token) {
+      const payload = jwt.verify(token, JWT_SECRET) as any;
+      userId = payload.id;
+      isAdmin = payload.role === 'admin';
+    } else {
       const userSession = cookieStore.get('astrix-user-session')?.value;
       if (userSession) {
         const user = JSON.parse(decodeURIComponent(userSession));
-        return user && user.role === 'admin';
+        userId = user.id || user._id;
+        isAdmin = user.role === 'admin';
       }
-      return false;
     }
-    
-    const payload = jwt.verify(token, JWT_SECRET) as any;
-    return payload && payload.role === 'admin';
-  } catch (e) {
-    return false;
-  }
+  } catch (e) {}
+  return { userId, ip, isAdmin };
 }
 
 // Helper to log audit actions
@@ -79,15 +83,18 @@ export async function GET(request: Request) {
 
     return NextResponse.json(paginated);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure('/api/departments (GET)', error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }
 
 // POST: Create a new department (admin only)
 export async function POST(request: Request) {
   try {
-    const isAdmin = await verifyAdmin();
+    const { userId, ip, isAdmin } = await getRequester(request);
     if (!isAdmin) {
+      await logAuditEvent(userId, 'security_unauthorized_access', 'FAILED', ip, { endpoint: '/api/departments', method: 'POST' });
       return NextResponse.json({ error: 'Forbidden: Admin role required' }, { status: 403 });
     }
 
@@ -96,6 +103,12 @@ export async function POST(request: Request) {
 
     if (!name || !code) {
       return NextResponse.json({ error: 'Name and code are required' }, { status: 400 });
+    }
+
+    // Code syntax constraint: 2-10 alphanumeric characters or hyphens
+    const DEPT_CODE_REGEX = /^[A-Z0-9-]{2,10}$/i;
+    if (!DEPT_CODE_REGEX.test(code)) {
+      return NextResponse.json({ error: 'Validation Error: Department code must be 2-10 alphanumeric characters or hyphens' }, { status: 400 });
     }
 
     // Check if code already exists
@@ -112,19 +125,22 @@ export async function POST(request: Request) {
       description
     });
 
-    await logAuditAction('CREATE', null, newRecord);
+    await logAuditEvent(userId, 'create_department', 'SUCCESS', ip, { code: code.toUpperCase(), name });
 
     return NextResponse.json(newRecord, { status: 201 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure('/api/departments (POST)', error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }
 
 // PUT: Update an existing department (admin only)
 export async function PUT(request: Request) {
   try {
-    const isAdmin = await verifyAdmin();
+    const { userId, ip, isAdmin } = await getRequester(request);
     if (!isAdmin) {
+      await logAuditEvent(userId, 'security_unauthorized_access', 'FAILED', ip, { endpoint: '/api/departments', method: 'PUT' });
       return NextResponse.json({ error: 'Forbidden: Admin role required' }, { status: 403 });
     }
 
@@ -141,20 +157,36 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Department not found' }, { status: 404 });
     }
 
+    // If updating code, validate syntax and uniqueness
+    const { code } = body;
+    if (code) {
+      const DEPT_CODE_REGEX = /^[A-Z0-9-]{2,10}$/i;
+      if (!DEPT_CODE_REGEX.test(code)) {
+        return NextResponse.json({ error: 'Validation Error: Department code must be 2-10 alphanumeric characters or hyphens' }, { status: 400 });
+      }
+      const existing = departments.find((d: any) => d.code === code.toUpperCase() && d.id !== id);
+      if (existing) {
+        return NextResponse.json({ error: `Department with code ${code.toUpperCase()} already exists` }, { status: 400 });
+      }
+    }
+
     const updatedRecord = await updateDbRecord('departments', id, body);
-    await logAuditAction('UPDATE', oldRecord, updatedRecord);
+    await logAuditEvent(userId, 'update_department', 'SUCCESS', ip, { id, code: code || oldRecord.code, name: body.name || oldRecord.name });
 
     return NextResponse.json(updatedRecord);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure('/api/departments (PUT)', error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }
 
 // DELETE: Delete a department (admin only)
 export async function DELETE(request: Request) {
   try {
-    const isAdmin = await verifyAdmin();
+    const { userId, ip, isAdmin } = await getRequester(request);
     if (!isAdmin) {
+      await logAuditEvent(userId, 'security_unauthorized_access', 'FAILED', ip, { endpoint: '/api/departments', method: 'DELETE' });
       return NextResponse.json({ error: 'Forbidden: Admin role required' }, { status: 403 });
     }
 
@@ -175,10 +207,12 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'Delete operation failed' }, { status: 500 });
     }
 
-    await logAuditAction('DELETE', oldRecord, null);
+    await logAuditEvent(userId, 'delete_department', 'SUCCESS', ip, { id, code: oldRecord.code, name: oldRecord.name });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const { trackApiFailure } = require('@/lib/monitor');
+    trackApiFailure('/api/departments (DELETE)', error);
+    return NextResponse.json({ success: false, message: 'Something went wrong. Please try again later.' }, { status: 500 });
   }
 }

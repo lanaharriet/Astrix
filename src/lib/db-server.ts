@@ -156,7 +156,7 @@ export async function insertDbRecord(table: string, record: any): Promise<any> {
         // Hash passwords for profiles if needed
         if (table === 'profiles' && docData.password && !docData.password.startsWith('$2a$')) {
           const bcrypt = require('bcryptjs');
-          docData.password = await bcrypt.hash(docData.password, 10);
+          docData.password = await bcrypt.hash(docData.password, 12);
         }
 
         const doc = await Model.create(docData);
@@ -191,7 +191,7 @@ export async function updateDbRecord(table: string, id: string, updates: any): P
         const docUpdates = { ...updates };
         if (table === 'profiles' && docUpdates.password && !docUpdates.password.startsWith('$2a$')) {
           const bcrypt = require('bcryptjs');
-          docUpdates.password = await bcrypt.hash(docUpdates.password, 10);
+          docUpdates.password = await bcrypt.hash(docUpdates.password, 12);
         }
 
         const doc = await Model.findOneAndUpdate(
