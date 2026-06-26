@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthProvider } from "@/components/auth-provider";
 import CustomCursor from "@/components/CustomCursor";
 import "./globals.css";
 
@@ -37,8 +38,10 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col antialiased">
         <ThemeProvider>
-          <CustomCursor />
-          {children}
+          <AuthProvider>
+            <CustomCursor />
+            {children}
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

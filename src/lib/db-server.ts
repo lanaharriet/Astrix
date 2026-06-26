@@ -1,7 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import { createClient as createSupabaseServerClient } from './supabase/server';
+import dbConnect from './mongodb';
+import { getModelByTable } from './models';
 import * as seed from './seed-data';
 
 // Determine writable DB path (outside of src to prevent Next.js hot-reload re-compilation)
@@ -14,13 +15,9 @@ function getDbFilePath(): string {
 
 const DB_FILE_PATH = getDbFilePath();
 
-// Check if Supabase env vars are set
-export function isSupabaseConfigured(): boolean {
-  return !!(
-    process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
-    process.env.NEXT_PUBLIC_SUPABASE_URL !== 'https://placeholder-url.supabase.co'
-  );
+// Check if MongoDB environment variable is set
+export function isMongoConfigured(): boolean {
+  return !!process.env.MONGODB_URI;
 }
 
 // Get initial database state
@@ -71,7 +68,7 @@ function getInitialDbState() {
     resume_uploads: [] as any[],
     achievements: [
       { id: 'ach-1', student_id: 'u-student-1', title: 'Smart India Hackathon Winner', description: 'First prize in smart education category.', date: '2026-03-12', category: 'Hackathon' },
-    ] as any[]
+    ]
   };
 }
 
@@ -79,7 +76,6 @@ function getInitialDbState() {
 export function readLocalDb(): any {
   try {
     if (!fs.existsSync(DB_FILE_PATH)) {
-      // Check if there is an existing local-db.json in src/lib/ to migrate
       const oldPath = path.join(process.cwd(), 'src', 'lib', 'local-db.json');
       if (fs.existsSync(oldPath)) {
         try {
@@ -117,14 +113,21 @@ export function writeLocalDb(data: any): void {
 
 // Unified CRUD server helpers
 export async function getDbRecords(table: string): Promise<any[]> {
-  if (isSupabaseConfigured()) {
+  if (isMongoConfigured()) {
     try {
-      const supabase = await createSupabaseServerClient();
-      const { data, error } = await supabase.from(table).select('*');
-      if (!error && data) return data;
-      console.warn(`Supabase read error on table ${table}, falling back to local DB:`, error);
+      await dbConnect();
+      const Model = getModelByTable(table);
+      if (Model) {
+        const docs = await Model.find({}).lean();
+        return docs.map((doc: any) => {
+          const mapped = { ...doc, id: doc._id };
+          delete mapped._id;
+          delete mapped.__v;
+          return mapped;
+        });
+      }
     } catch (err) {
-      console.warn(`Supabase connection failed, falling back to local DB:`, err);
+      console.warn(`MongoDB read failed on table ${table}, falling back to local DB:`, err);
     }
   }
 
@@ -134,52 +137,78 @@ export async function getDbRecords(table: string): Promise<any[]> {
 }
 
 export async function insertDbRecord(table: string, record: any): Promise<any> {
-  // Ensure we add an ID if it's missing
-  const newRecord = {
-    id: record.id || `rec-${Math.random().toString(36).substr(2, 9)}`,
-    created_at: new Date().toISOString(),
+  const recordId = record.id || record._id || `rec-${Math.random().toString(36).substr(2, 9)}`;
+  const timestamp = new Date().toISOString();
+  
+  const prepared = {
     ...record,
+    created_at: record.created_at || timestamp,
   };
 
-  if (isSupabaseConfigured()) {
+  if (isMongoConfigured()) {
     try {
-      const supabase = await createSupabaseServerClient();
-      const { data, error } = await supabase.from(table).insert([newRecord]).select();
-      if (!error && data) return data[0];
-      console.warn(`Supabase insert error on table ${table}, falling back to local DB:`, error);
+      await dbConnect();
+      const Model = getModelByTable(table);
+      if (Model) {
+        const docData = { ...prepared, _id: recordId };
+        delete docData.id;
+        
+        // Hash passwords for profiles if needed
+        if (table === 'profiles' && docData.password && !docData.password.startsWith('$2a$')) {
+          const bcrypt = require('bcryptjs');
+          docData.password = await bcrypt.hash(docData.password, 10);
+        }
+
+        const doc = await Model.create(docData);
+        const result = doc.toObject();
+        const mapped = { ...result, id: result._id };
+        delete mapped._id;
+        delete mapped.__v;
+        return mapped;
+      }
     } catch (err) {
-      console.warn(`Supabase connection failed, falling back to local DB:`, err);
+      console.warn(`MongoDB insert failed on table ${table}, falling back to local DB:`, err);
     }
   }
 
   // Fallback to local DB
   const db = readLocalDb();
   if (!db[table]) db[table] = [];
-  db[table].push(newRecord);
+  const localPrepared = { ...prepared, id: recordId };
+  db[table].push(localPrepared);
   writeLocalDb(db);
-  return newRecord;
+  return localPrepared;
 }
 
 export async function updateDbRecord(table: string, id: string, updates: any): Promise<any> {
-  if (isSupabaseConfigured()) {
+  if (isMongoConfigured()) {
     try {
-      const supabase = await createSupabaseServerClient();
-      
-      // Profiles are matched by 'id'
-      // Students and Faculty tables use 'profile_id' as PK
-      // Let's identify the correct key column
-      const keyColumn = (table === 'students' || table === 'faculty' || table === 'parents') ? 'profile_id' : 'id';
-      
-      const { data, error } = await supabase
-        .from(table)
-        .update(updates)
-        .eq(keyColumn, id)
-        .select();
+      await dbConnect();
+      const Model = getModelByTable(table);
+      if (Model) {
+        const keyField = (table === 'students' || table === 'faculty' || table === 'parents') ? 'profile_id' : '_id';
         
-      if (!error && data) return data[0];
-      console.warn(`Supabase update error on table ${table}, falling back to local DB:`, error);
+        const docUpdates = { ...updates };
+        if (table === 'profiles' && docUpdates.password && !docUpdates.password.startsWith('$2a$')) {
+          const bcrypt = require('bcryptjs');
+          docUpdates.password = await bcrypt.hash(docUpdates.password, 10);
+        }
+
+        const doc = await Model.findOneAndUpdate(
+          { [keyField]: id },
+          { $set: docUpdates },
+          { new: true }
+        ).lean();
+
+        if (doc) {
+          const mapped = { ...doc, id: doc._id };
+          delete mapped._id;
+          delete mapped.__v;
+          return mapped;
+        }
+      }
     } catch (err) {
-      console.warn(`Supabase connection failed, falling back to local DB:`, err);
+      console.warn(`MongoDB update failed on table ${table}, falling back to local DB:`, err);
     }
   }
 
@@ -199,15 +228,17 @@ export async function updateDbRecord(table: string, id: string, updates: any): P
 }
 
 export async function deleteDbRecord(table: string, id: string): Promise<boolean> {
-  if (isSupabaseConfigured()) {
+  if (isMongoConfigured()) {
     try {
-      const supabase = await createSupabaseServerClient();
-      const keyColumn = (table === 'students' || table === 'faculty' || table === 'parents') ? 'profile_id' : 'id';
-      const { error } = await supabase.from(table).delete().eq(keyColumn, id);
-      if (!error) return true;
-      console.warn(`Supabase delete error on table ${table}, falling back to local DB:`, error);
+      await dbConnect();
+      const Model = getModelByTable(table);
+      if (Model) {
+        const keyField = (table === 'students' || table === 'faculty' || table === 'parents') ? 'profile_id' : '_id';
+        const res = await Model.deleteOne({ [keyField]: id });
+        return res.deletedCount > 0;
+      }
     } catch (err) {
-      console.warn(`Supabase connection failed, falling back to local DB:`, err);
+      console.warn(`MongoDB delete failed on table ${table}, falling back to local DB:`, err);
     }
   }
 

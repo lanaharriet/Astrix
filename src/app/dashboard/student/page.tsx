@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/theme-provider';
+import { useAuth } from '@/components/auth-provider';
 import { db } from '@/lib/db-client';
 import DigitalIdCard from '@/components/DigitalIdCard';
 import CampusMap from '@/components/CampusMap';
@@ -41,6 +42,7 @@ import {
 
 export default function StudentDashboard() {
   const router = useRouter();
+  const { signOut } = useAuth();
   
   const getSubjectName = (subjectId: string) => {
     const subjectNames: Record<string, string> = {
@@ -195,8 +197,7 @@ export default function StudentDashboard() {
 
   // Sign out helper
   const handleLogout = () => {
-    localStorage.removeItem('astrix-user');
-    router.push('/auth/login');
+    signOut();
   };
 
   // Profile update

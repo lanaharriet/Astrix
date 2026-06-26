@@ -5,6 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/theme-provider';
+import { useAuth } from '@/components/auth-provider';
 import { db } from '@/lib/db-client';
 import { AstrixLogo } from '@/components/branding';
 import { 
@@ -31,6 +32,7 @@ import {
 export default function ParentDashboard() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
+  const { signOut } = useAuth();
 
   // Auth States
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -118,8 +120,7 @@ export default function ParentDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('astrix-user');
-    router.push('/auth/login');
+    signOut();
   };
 
   // Parent Profile Edit

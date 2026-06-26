@@ -5,6 +5,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/theme-provider';
+import { useAuth } from '@/components/auth-provider';
+import DepartmentManager from '@/components/admin/DepartmentManager';
 import { db } from '@/lib/db-client';
 import { AstrixLogo } from '@/components/branding';
 import { 
@@ -36,12 +38,13 @@ import {
 export default function AdminDashboard() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
+  const { signOut } = useAuth();
 
   // Auth
   const [currentUser, setCurrentUser] = useState<any>(null);
 
   // Tab views
-  const [activeTab, setActiveTab] = useState<'analytics' | 'timetable' | 'users' | 'csv' | 'governance' | 'notices' | 'audit'>('analytics');
+  const [activeTab, setActiveTab] = useState<'analytics' | 'timetable' | 'users' | 'csv' | 'governance' | 'notices' | 'audit' | 'departments'>('analytics');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Data Records
@@ -156,8 +159,7 @@ export default function AdminDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('astrix-user');
-    router.push('/auth/login');
+    signOut();
   };
 
   // Profile update handler
@@ -536,6 +538,12 @@ export default function AdminDashboard() {
               className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'users' ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-accent'}`}
             >
               <Users size={16} /> User Manager
+            </button>
+            <button 
+              onClick={() => setActiveTab('departments')}
+              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'departments' ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-accent'}`}
+            >
+              <Building2 size={16} /> Department Manager
             </button>
             <button 
               onClick={() => setActiveTab('csv')}
@@ -934,6 +942,13 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* DEPARTMENTS MANAGER */}
+        {activeTab === 'departments' && (
+          <div className="space-y-8 animate-fadeIn">
+            <DepartmentManager />
+          </div>
+        )}
+
         {/* 2. USER MANAGER */}
         {activeTab === 'users' && (
           <div className="space-y-8 animate-fadeIn">
@@ -1283,6 +1298,12 @@ export default function AdminDashboard() {
                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'users' ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-accent'}`}
                 >
                   <Users size={16} /> User Manager
+                </button>
+                <button 
+                  onClick={() => { setActiveTab('departments'); setMobileMenuOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'departments' ? 'bg-primary text-primary-foreground shadow-md' : 'hover:bg-accent'}`}
+                >
+                  <Building2 size={16} /> Department Manager
                 </button>
                 <button 
                   onClick={() => { setActiveTab('csv'); setMobileMenuOpen(false); }}

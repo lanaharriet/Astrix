@@ -1,31 +1,34 @@
 import { NextResponse } from 'next/server';
-import { isSupabaseConfigured, readLocalDb } from '@/lib/db-server';
-import { createClient } from '@/lib/supabase/server';
+import { isMongoConfigured, readLocalDb } from '@/lib/db-server';
+import dbConnect from '@/lib/mongodb';
+import { getModelByTable } from '@/lib/models';
 
 export async function GET() {
   try {
-    const supabaseActive = isSupabaseConfigured();
+    const isMongo = isMongoConfigured();
     
-    if (supabaseActive) {
-      const supabase = await createClient();
-      
-      // Perform a test query on the profiles table
-      const { error } = await supabase.from('profiles').select('id').limit(1);
-      
-      if (error) {
+    if (isMongo) {
+      try {
+        await dbConnect();
+        const UserModel = getModelByTable('profiles');
+        
+        if (UserModel) {
+          const profileCount = await UserModel.countDocuments();
+          return NextResponse.json({
+            status: 'ready',
+            mode: 'mongodb',
+            message: 'Database connected successfully. MongoDB Atlas is active.',
+            profileCount,
+          });
+        }
+      } catch (error: any) {
         return NextResponse.json({
           status: 'error',
-          mode: 'supabase',
-          message: 'Supabase credentials are set, but tables do not exist. Please run schema.sql inside your Supabase SQL Editor.',
-          errorDetails: error,
+          mode: 'mongodb',
+          message: 'MongoDB Atlas credentials are set, but connection failed.',
+          errorDetails: error.message,
         });
       }
-      
-      return NextResponse.json({
-        status: 'ready',
-        mode: 'supabase',
-        message: 'Database connected successfully. Supabase is active with all tables.',
-      });
     }
 
     // Local JSON DB active

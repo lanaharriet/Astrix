@@ -6,6 +6,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTheme } from '@/components/theme-provider';
+import { useAuth } from '@/components/auth-provider';
 import { db } from '@/lib/db-client';
 import { AstrixLogo } from '@/components/branding';
 import { 
@@ -27,7 +28,9 @@ function LoginPanel() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
-  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot'>('login');
+  const { signIn, signUp, resetPassword, updatePassword } = useAuth();
+  
+  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'forgot' | 'reset-callback'>('login');
   const [role, setRole] = useState<'student' | 'faculty' | 'parent' | 'admin'>('student');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -40,6 +43,8 @@ function LoginPanel() {
     const tab = searchParams.get('tab');
     if (tab === 'register') {
       setActiveTab('register');
+    } else if (tab === 'reset-callback') {
+      setActiveTab('reset-callback');
     }
   }, [searchParams]);
 
@@ -51,51 +56,16 @@ function LoginPanel() {
 
     try {
       if (activeTab === 'login') {
-        // Query database to find a matching profile
-        const profiles = await db.profiles.select({ email });
-        const userProfile = profiles[0];
-
-        if (userProfile) {
-          // Success! Save session locally and redirect
-          localStorage.setItem('astrix-user', JSON.stringify(userProfile));
-          setMessage({ type: 'success', text: 'Login successful! Redirecting...' });
-          setTimeout(() => {
-            router.push(`/dashboard/${userProfile.role}`);
-          }, 800);
+        const res = await signIn(email, password);
+        if (res.error) {
+          setMessage({ type: 'error', text: res.error.message || 'Authentication error.' });
         } else {
-          // Fallback if not in database, match default emails
-          let fallbackRole: 'student' | 'faculty' | 'parent' | 'admin' | null = null;
-          let fallbackName = '';
-          
-          if (email.includes('admin')) {
-            fallbackRole = 'admin';
-            fallbackName = 'Dr. Sarah Jenkins';
-          } else if (email.includes('turing') || email.includes('faculty')) {
-            fallbackRole = 'faculty';
-            fallbackName = 'Dr. Alan Turing';
-          } else if (email.includes('doe') || email.includes('student')) {
-            fallbackRole = 'student';
-            fallbackName = 'John Doe';
-          } else if (email.includes('parent')) {
-            fallbackRole = 'parent';
-            fallbackName = 'Richard Doe';
-          }
-
-          if (fallbackRole) {
-            const fallbackProfile = {
-              id: `u-${fallbackRole}-mock`,
-              name: fallbackName,
-              email,
-              role: fallbackRole
-            };
-            localStorage.setItem('astrix-user', JSON.stringify(fallbackProfile));
-            setMessage({ type: 'success', text: 'Login successful! Redirecting...' });
-            setTimeout(() => {
-              router.push(`/dashboard/${fallbackRole}`);
-            }, 800);
-          } else {
-            setMessage({ type: 'error', text: 'Account not found. Try Quick Login options below.' });
-          }
+          setMessage({ type: 'success', text: 'Login successful! Redirecting...' });
+          const userStr = localStorage.getItem('astrix-user');
+          const userRole = userStr ? JSON.parse(userStr).role : 'student';
+          setTimeout(() => {
+            router.push(`/dashboard/${userRole}`);
+          }, 800);
         }
       } else if (activeTab === 'register') {
         if (!name || !email || !password) {
@@ -104,47 +74,23 @@ function LoginPanel() {
           return;
         }
 
-        // 1. Create Profile
-        const newProfile = await db.profiles.insert({
-          name,
-          email,
-          role,
-        });
-
-        // 2. Set role-specific relational record
-        if (role === 'student') {
-          await db.students.insert({
-            profile_id: newProfile.id,
-            register_number: `REG${Math.floor(100000 + Math.random() * 900000)}`,
-            department_id: 'd-cse',
-            year: 1,
-            semester: 1,
-            cgpa: 0.00
-          });
-        } else if (role === 'faculty') {
-          await db.faculty.insert({
-            profile_id: newProfile.id,
-            faculty_id: `FAC-${Math.floor(1000 + Math.random() * 9000)}`,
-            department_id: 'd-cse',
-            designation: 'Assistant Professor'
-          });
-        } else if (role === 'parent') {
-          await db.parents.insert({
-            profile_id: newProfile.id,
-            student_id: 'u-student-1',
-            relation: 'Parent'
-          });
+        const res = await signUp(email, password, name, role);
+        if (res.error) {
+          setMessage({ type: 'error', text: res.error.message || 'Registration failed.' });
+        } else {
+          setMessage({ type: 'success', text: 'Registration successful! Directing to dashboard...' });
+          setTimeout(() => {
+            router.push(`/dashboard/${role}`);
+          }, 800);
         }
-
-        localStorage.setItem('astrix-user', JSON.stringify(newProfile));
-        setMessage({ type: 'success', text: 'Registration successful! Directing to dashboard...' });
-        setTimeout(() => {
-          router.push(`/dashboard/${role}`);
-        }, 800);
-      } else {
-        // Forgot Password
-        setMessage({ type: 'success', text: 'Password reset link sent to your email.' });
-        setTimeout(() => setActiveTab('login'), 2000);
+      } else if (activeTab === 'forgot') {
+        const res = await resetPassword(email);
+        if (res.error) {
+          setMessage({ type: 'error', text: res.error.message || 'Password reset failed.' });
+        } else {
+          setMessage({ type: 'success', text: 'Password reset link sent to your email.' });
+          setTimeout(() => setActiveTab('login'), 2000);
+        }
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'Authentication error.' });
@@ -153,9 +99,34 @@ function LoginPanel() {
     }
   };
 
+  // Handle password reset update password
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setMessage(null);
+
+    try {
+      const res = await updatePassword(password);
+      if (res.error) {
+        setMessage({ type: 'error', text: res.error.message || 'Failed to update password.' });
+      } else {
+        setMessage({ type: 'success', text: 'Password updated successfully! Redirecting to login...' });
+        setTimeout(() => {
+          setActiveTab('login');
+          router.push('/auth/login');
+        }, 1500);
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Error updating password.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Developer Quick Login bypass
   const handleQuickLogin = async (selectedRole: 'student' | 'faculty' | 'parent' | 'admin') => {
     setIsLoading(true);
+    setMessage(null);
     let mockEmail = '';
     if (selectedRole === 'admin') mockEmail = 'admin@astrix.edu';
     else if (selectedRole === 'faculty') mockEmail = 'turing@astrix.edu';
@@ -163,24 +134,47 @@ function LoginPanel() {
     else if (selectedRole === 'parent') mockEmail = 'richard.doe@gmail.com';
 
     try {
-      const profiles = await db.profiles.select({ email: mockEmail });
-      const profile = profiles[0];
-      if (profile) {
-        localStorage.setItem('astrix-user', JSON.stringify(profile));
-        router.push(`/dashboard/${selectedRole}`);
+      const res = await signIn(mockEmail, 'Password123!');
+      if (res.error) {
+        const setupRes = await fetch('/api/admin/setup-db').then(r => r.json()).catch(() => ({ mode: 'local' }));
+        if (setupRes.mode === 'mongodb') {
+          setMessage({ 
+            type: 'error', 
+            text: `Quick-login account (${mockEmail}) not found in MongoDB. Please register this account first or click reset db in admin dashboard.` 
+          });
+          setIsLoading(false);
+          return;
+        } else {
+          const profiles = await db.profiles.select({ email: mockEmail });
+          const profile = profiles[0];
+          if (profile) {
+            localStorage.setItem('astrix-user', JSON.stringify(profile));
+            document.cookie = `astrix-user-session=${encodeURIComponent(JSON.stringify(profile))}; path=/; max-age=86400; SameSite=Lax`;
+            router.push(`/dashboard/${selectedRole}`);
+          } else {
+            const defaultProfile = {
+              id: `u-${selectedRole}-mock`,
+              name: selectedRole === 'admin' ? 'Dr. Sarah Jenkins' : selectedRole === 'faculty' ? 'Dr. Alan Turing' : selectedRole === 'student' ? 'John Doe' : 'Richard Doe',
+              email: mockEmail,
+              role: selectedRole
+            };
+            localStorage.setItem('astrix-user', JSON.stringify(defaultProfile));
+            document.cookie = `astrix-user-session=${encodeURIComponent(JSON.stringify(defaultProfile))}; path=/; max-age=86400; SameSite=Lax`;
+            router.push(`/dashboard/${selectedRole}`);
+          }
+        }
       } else {
-        // Hard fallback if profiles aren't seeded yet
-        const defaultProfile = {
-          id: `u-${selectedRole}-mock`,
-          name: selectedRole === 'admin' ? 'Dr. Sarah Jenkins' : selectedRole === 'faculty' ? 'Dr. Alan Turing' : selectedRole === 'student' ? 'John Doe' : 'Richard Doe',
-          email: mockEmail,
-          role: selectedRole
-        };
-        localStorage.setItem('astrix-user', JSON.stringify(defaultProfile));
-        router.push(`/dashboard/${selectedRole}`);
+        const userStr = localStorage.getItem('astrix-user');
+        const userRole = userStr ? JSON.parse(userStr).role : selectedRole;
+        setMessage({ type: 'success', text: `Logged in as ${selectedRole}! Redirecting...` });
+        setTimeout(() => {
+          router.push(`/dashboard/${userRole}`);
+        }, 800);
       }
-    } catch (e) {
-      router.push(`/dashboard/${selectedRole}`);
+    } catch (e: any) {
+      setMessage({ type: 'error', text: e.message || 'Quick login failed.' });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -214,6 +208,7 @@ function LoginPanel() {
           {activeTab === 'login' && 'Access Campus Portal'}
           {activeTab === 'register' && 'Create Your Campus Account'}
           {activeTab === 'forgot' && 'Reset Your Password'}
+          {activeTab === 'reset-callback' && 'Update Your Password'}
         </h2>
         <p className="mt-2 text-sm text-white/80 font-medium">
           {activeTab === 'login' && (
@@ -237,6 +232,11 @@ function LoginPanel() {
               Return to Login
             </button>
           )}
+          {activeTab === 'reset-callback' && (
+            <button onClick={() => setActiveTab('login')} className="text-primary hover:underline font-bold">
+              Return to Login
+            </button>
+          )}
         </p>
       </div>
 
@@ -252,8 +252,26 @@ function LoginPanel() {
             </div>
           )}
 
-          <form className="space-y-5" onSubmit={handleAuth}>
-            {activeTab === 'forgot' ? (
+          <form className="space-y-5" onSubmit={activeTab === 'reset-callback' ? handleUpdatePassword : handleAuth}>
+            {activeTab === 'reset-callback' ? (
+              <div>
+                <label htmlFor="new-password" className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">New Password</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted">
+                    <Lock size={16} />
+                  </div>
+                  <input
+                    id="new-password"
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-2 border border-border rounded-xl bg-background text-text text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+            ) : activeTab === 'forgot' ? (
               <div>
                 <label htmlFor="reset-email" className="block text-xs font-bold uppercase tracking-wider text-muted mb-2">Email Address</label>
                 <div className="relative">
@@ -376,6 +394,8 @@ function LoginPanel() {
                   'Sign In'
                 ) : activeTab === 'register' ? (
                   'Create Account'
+                ) : activeTab === 'reset-callback' ? (
+                  'Update Password'
                 ) : (
                   'Send Reset Link'
                 )}

@@ -35,7 +35,7 @@ class TableClient<T = any> {
 
   // Fetch all records, optional query parameters
   async select(filters?: Record<string, string | number | boolean>): Promise<T[]> {
-    let url = `/api/db/${this.tableName}`;
+    let url = this.tableName === 'departments' ? '/api/departments' : `/api/db/${this.tableName}`;
     if (filters) {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, val]) => {
@@ -82,7 +82,7 @@ class TableClient<T = any> {
 
   // Insert a new record
   async insert(record: Partial<T>): Promise<T> {
-    const url = `/api/db/${this.tableName}`;
+    const url = this.tableName === 'departments' ? '/api/departments' : `/api/db/${this.tableName}`;
     
     // Ensure ID exists
     const keyField = (this.tableName === 'students' || this.tableName === 'faculty' || this.tableName === 'parents') ? 'profile_id' : 'id';
@@ -126,7 +126,7 @@ class TableClient<T = any> {
       ? 'profile_id' 
       : 'id';
       
-    const url = `/api/db/${this.tableName}?${keyField}=${encodeURIComponent(id)}`;
+    const url = `${this.tableName === 'departments' ? '/api/departments' : `/api/db/${this.tableName}`}?${keyField}=${encodeURIComponent(id)}`;
     
     let updatedRecord: T;
     try {
@@ -165,7 +165,7 @@ class TableClient<T = any> {
       ? 'profile_id' 
       : 'id';
       
-    const url = `/api/db/${this.tableName}?${keyField}=${encodeURIComponent(id)}`;
+    const url = `${this.tableName === 'departments' ? '/api/departments' : `/api/db/${this.tableName}`}?${keyField}=${encodeURIComponent(id)}`;
     
     let success = false;
     try {

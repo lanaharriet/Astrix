@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/theme-provider';
+import { useAuth } from '@/components/auth-provider';
 import { db } from '@/lib/db-client';
 import DigitalIdCard from '@/components/DigitalIdCard';
 import { AstrixLogo } from '@/components/branding';
@@ -37,6 +38,7 @@ import {
 export default function FacultyDashboard() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
+  const { signOut } = useAuth();
 
   // Auth & Profile
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -164,8 +166,7 @@ export default function FacultyDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('astrix-user');
-    router.push('/auth/login');
+    signOut();
   };
 
   // Profile updates
