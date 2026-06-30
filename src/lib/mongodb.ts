@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
 import { validateEnv } from './env-validator';
+
+// Force Node.js to use public DNS resolvers (Google + Cloudflare) to bypass
+// router DNS that may block MongoDB Atlas SRV lookups (querySrv ECONNREFUSED)
+dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
 
 const MONGODB_URI = process.env.MONGODB_URI;
 

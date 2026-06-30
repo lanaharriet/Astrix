@@ -35,28 +35,32 @@ async function fetchGroq(messages: ChatMessage[], temperature: number, apiKey: s
 }
 
 export async function queryGroq(messages: ChatMessage[], temperature = 0.5): Promise<string> {
-  const apiKey = process.env.GROQ_API_KEY;
+  const apiKey = (process.env.GROQ_API_KEY || '').trim();
 
-  if (apiKey && apiKey !== 'placeholder-groq-key' && apiKey !== 'gsk_your_groq_api_key') {
+  if (apiKey && apiKey !== 'placeholder-groq-key' && apiKey !== 'gsk_your_groq_api_key' && apiKey.startsWith('gsk_')) {
     let attempts = 3; // 1 initial + 2 retries
     while (attempts > 0) {
       try {
+        console.log(`[Groq AI] Sending request to Groq API. Messages: ${messages.length}, model: llama-3.1-8b-instant`);
         const responseText = await Promise.race([
           fetchGroq(messages, temperature, apiKey),
           timeout(15000)
         ]);
+        console.log(`[Groq AI] Success. Response length: ${responseText.length}`);
         return responseText;
       } catch (error: any) {
         attempts--;
-        console.warn(`Groq AI attempt failed (${attempts} attempts remaining). Error: ${error.message}`);
+        console.warn(`[Groq AI] Attempt failed (${attempts} attempts remaining). Error: ${error.message}`);
         if (attempts === 0) {
-          console.error('All Groq AI attempts failed. Switching to semantic local fallback.');
+          console.error('[Groq AI] All Groq AI attempts failed. Switching to semantic local fallback.');
         } else {
           // Delay before retrying
           await new Promise(res => setTimeout(res, 500));
         }
       }
     }
+  } else {
+    console.warn(`[Groq AI] Key is missing, invalid or placeholder. Using semantic local fallback. Key prefix: ${apiKey ? apiKey.substring(0, 6) : 'none'}`);
   }
 
   // Local Semantic fallback when GROQ_API_KEY is not present or API fails

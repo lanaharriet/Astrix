@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/components/theme-provider';
 import { useAuth } from '@/components/auth-provider';
@@ -37,7 +37,10 @@ import {
   Sun,
   Moon,
   Menu,
-  X
+  X,
+  Copy,
+  Check,
+  RefreshCw
 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -68,6 +71,106 @@ export default function StudentDashboard() {
     { role: 'assistant', content: 'Hello! I am your ASTRIX Campus Copilot. Ask me about your grades, classes, fees, or how to locate your next lecture.' }
   ]);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [copiedMessageIndex, setCopiedMessageIndex] = useState<number | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll chat to bottom when new messages are added or loading state changes
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages, isAiLoading]);
+
+  // Copy assistant message to clipboard
+  const handleCopyMessage = useCallback((content: string, idx: number) => {
+    navigator.clipboard.writeText(content);
+    setCopiedMessageIndex(idx);
+    setTimeout(() => setCopiedMessageIndex(null), 2000);
+  }, []);
+
+  // Retry: re-send the last user message
+  const handleRetry = useCallback(() => {
+    const lastUserMsg = [...chatMessages].reverse().find(m => m.role === 'user');
+    if (lastUserMsg) {
+      setChatInput(lastUserMsg.content);
+      // Trigger send on next tick after state update
+      setTimeout(() => {
+        const form = document.querySelector('[data-copilot-form]') as HTMLFormElement;
+        if (form) form.requestSubmit();
+      }, 50);
+    }
+  }, [chatMessages]);
+
+  // Lightweight markdown renderer for assistant messages
+  const renderMarkdown = useCallback((text: string) => {
+    // Split into lines for bullet processing
+    const lines = text.split('\n');
+    const elements: React.ReactNode[] = [];
+    let listItems: string[] = [];
+
+    const flushList = () => {
+      if (listItems.length > 0) {
+        elements.push(
+          <ul key={`ul-${elements.length}`} className="list-disc list-inside space-y-0.5 my-1">
+            {listItems.map((item, i) => (
+              <li key={i}>{renderInline(item)}</li>
+            ))}
+          </ul>
+        );
+        listItems = [];
+      }
+    };
+
+    // Render inline formatting: bold (**), inline code (`)
+    const renderInline = (line: string): React.ReactNode => {
+      const parts: React.ReactNode[] = [];
+      // Regex: match **bold**, `code`, or plain text
+      const regex = /(\*\*(.+?)\*\*)|(`([^`]+)`)/g;
+      let lastIndex = 0;
+      let match;
+
+      while ((match = regex.exec(line)) !== null) {
+        // Push text before match
+        if (match.index > lastIndex) {
+          parts.push(line.slice(lastIndex, match.index));
+        }
+        if (match[2]) {
+          // Bold
+          parts.push(<strong key={match.index} className="font-bold">{match[2]}</strong>);
+        } else if (match[4]) {
+          // Inline code
+          parts.push(
+            <code key={match.index} className="px-1 py-0.5 rounded bg-accent text-[10px] font-mono">{match[4]}</code>
+          );
+        }
+        lastIndex = match.index + match[0].length;
+      }
+      // Remaining text
+      if (lastIndex < line.length) {
+        parts.push(line.slice(lastIndex));
+      }
+      return parts.length > 0 ? parts : line;
+    };
+
+    lines.forEach((line, i) => {
+      const bulletMatch = line.match(/^\s*[\*\-]\s+(.*)/);
+      if (bulletMatch) {
+        listItems.push(bulletMatch[1]);
+      } else {
+        flushList();
+        if (line.trim() === '') {
+          elements.push(<br key={`br-${i}`} />);
+        } else {
+          elements.push(
+            <span key={`ln-${i}`} className="block">{renderInline(line)}</span>
+          );
+        }
+      }
+    });
+    flushList();
+
+    return elements;
+  }, []);
 
   // Form states
   const [leaveType, setLeaveType] = useState('Medical Leave');
@@ -1570,29 +1673,65 @@ PROJECTS
           </div>
 
           {/* Chat Messages */}
-          <div className="flex-1 overflow-y-auto py-4 space-y-3 pr-1 text-xs">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto py-4 space-y-3 pr-1 text-xs">
             {chatMessages.map((msg, idx) => (
               <div 
                 key={idx} 
-                className={`p-3 rounded-xl max-w-[85%] leading-relaxed ${
+                className={`group relative p-3 rounded-xl max-w-[85%] leading-relaxed ${
                   msg.role === 'user' 
                     ? 'bg-primary text-primary-foreground ml-auto' 
                     : 'bg-background border border-border'
                 }`}
               >
-                {/* Format markdown bold/bullet indicators briefly */}
-                <span className="whitespace-pre-line font-medium">{msg.content}</span>
+                {/* Render message content with lightweight markdown for assistant */}
+                {msg.role === 'assistant' ? (
+                  <div className="font-medium space-y-0.5">{renderMarkdown(msg.content)}</div>
+                ) : (
+                  <span className="whitespace-pre-line font-medium">{msg.content}</span>
+                )}
+
+                {/* Copy button on assistant messages — visible on hover */}
+                {msg.role === 'assistant' && (
+                  <button
+                    onClick={() => handleCopyMessage(msg.content, idx)}
+                    className="absolute bottom-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded hover:bg-accent text-muted hover:text-text"
+                    aria-label="Copy message"
+                  >
+                    {copiedMessageIndex === idx ? (
+                      <Check size={12} className="text-success" />
+                    ) : (
+                      <Copy size={12} />
+                    )}
+                  </button>
+                )}
+
+                {/* Retry button on error/failed assistant messages */}
+                {msg.role === 'assistant' && /error|failed/i.test(msg.content) && (
+                  <button
+                    onClick={handleRetry}
+                    className="mt-2 flex items-center gap-1 text-[10px] text-muted hover:text-primary transition-colors"
+                    aria-label="Retry message"
+                  >
+                    <RefreshCw size={10} /> Retry
+                  </button>
+                )}
               </div>
             ))}
             {isAiLoading && (
               <div className="bg-background border border-border p-3 rounded-xl max-w-[85%] flex items-center gap-2 text-muted">
-                <Loader2 size={12} className="animate-spin" /> Analyzing query...
+                <Loader2 size={12} className="animate-spin" />
+                <span>Analyzing query</span>
+                <span className="flex items-center gap-0.5 ml-0.5">
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
+                  <span className="typing-dot" />
+                </span>
               </div>
             )}
           </div>
 
           {/* Message Input */}
-          <form onSubmit={handleSendMessage} className="relative mt-2">
+          <form onSubmit={handleSendMessage} data-copilot-form className="relative mt-2">
             <input
               type="text"
               placeholder="Ask anything about campus..."

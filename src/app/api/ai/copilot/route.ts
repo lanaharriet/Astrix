@@ -39,7 +39,10 @@ async function getContextPrompt(userId: string): Promise<string> {
       fees,
       timetableEntries,
       placements,
-      placementApps
+      placementApps,
+      results,
+      exams,
+      notices
     ] = await Promise.all([
       getDbRecords('profiles'),
       getDbRecords('departments'),
@@ -51,7 +54,10 @@ async function getContextPrompt(userId: string): Promise<string> {
       getDbRecords('fees'),
       getDbRecords('timetable_entries'),
       getDbRecords('placements'),
-      getDbRecords('placement_applications')
+      getDbRecords('placement_applications'),
+      getDbRecords('results'),
+      getDbRecords('exams'),
+      getDbRecords('notices')
     ]);
 
     const profile = profiles.find((p: any) => p.id === userId || p._id === userId);
@@ -177,6 +183,35 @@ Role: ${role}
       }
     }
 
+    // 6. Academic Exam Results (Grades)
+    if (studentId) {
+      const studentResults = results.filter((res: any) => res.student_id === studentId);
+      if (studentResults.length > 0) {
+        context += `\nAcademic Exam Results (Grades):\n`;
+        studentResults.forEach((res: any) => {
+          const exam = exams.find((e: any) => e.id === res.exam_id || e._id === res.exam_id);
+          const sub = subjects.find((s: any) => s.id === res.subject_id || s._id === res.subject_id);
+          const examName = exam ? exam.name : 'Semester Exam';
+          const subName = sub ? sub.name : res.subject_id;
+          context += `- Exam: ${examName} | Subject: ${subName} | Marks: ${res.marks_obtained}/${exam ? exam.max_marks : 100} | Grade: ${res.grade}\n`;
+        });
+      } else {
+        context += `\nAcademic Exam Results: No grades published in database.\n`;
+      }
+    }
+
+    // 7. Campus Notices (Announcements)
+    const targetRoleText = role === 'student' ? 'Student' : role === 'faculty' ? 'Faculty' : role === 'parent' ? 'Parent' : 'All';
+    const userNotices = notices.filter((n: any) => n.target_role === 'All' || n.target_role === targetRoleText);
+    if (userNotices.length > 0) {
+      context += `\nActive Campus Notices:\n`;
+      userNotices.slice(0, 5).forEach((n: any) => {
+        context += `- Notice: ${n.title} | Content: ${n.content} | Date: ${n.created_at}\n`;
+      });
+    } else {
+      context += `\nActive Campus Notices: No active notices published.\n`;
+    }
+
     context += `\n-------------------------------\n`;
     return context;
   } catch (err: any) {
@@ -251,7 +286,8 @@ export async function POST(request: Request) {
     await logAuditEvent(userIdVal, 'ai_request_copilot', 'FAILED', ip, { error: error.message });
     return NextResponse.json({
       success: false,
-      message: 'Something went wrong. Please try again later.'
+      error: 'Campus Copilot is temporarily unavailable.',
+      message: 'Campus Copilot is temporarily unavailable.'
     }, { status: 500 });
   }
 }

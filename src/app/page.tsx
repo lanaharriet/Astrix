@@ -37,6 +37,7 @@ import AnimatedStats from '@/components/landing/AnimatedStats';
 import StudentJourney from '@/components/landing/StudentJourney';
 import AICopilotDemo from '@/components/landing/AICopilotDemo';
 import CampusRouteDemo from '@/components/landing/CampusRouteDemo';
+import TeamShowcase from '@/components/landing/TeamShowcase';
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
@@ -49,7 +50,8 @@ export default function Home() {
     { name: 'Features', id: 'features' },
     { name: 'Timelines', id: 'timeline' },
     { name: 'Departments', id: 'departments' },
-    { name: 'Simulator', id: 'success' }
+    { name: 'Simulator', id: 'success' },
+    { name: 'Team', id: 'team' }
   ];
 
   return (
@@ -341,6 +343,9 @@ export default function Home() {
           </ScrollReveal>
         </div>
       </section>
+
+      {/* TEAM SHOWCASE */}
+      <TeamShowcase />
 
       {/* CTA SECTION */}
       <section className="py-24 border-t border-border bg-gradient-to-b from-transparent to-accent/20 w-full flex justify-center">

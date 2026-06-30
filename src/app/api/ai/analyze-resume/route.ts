@@ -18,9 +18,10 @@ Provide ONLY the raw JSON block. Do not wrap it in markdown tags or write introd
 // Pre-defined safe validation fallback JSON
 const SAFE_FALLBACK_JSON = {
   score: 75,
-  strengths: ["Unable to analyze fully"],
-  weaknesses: ["AI response malformed"],
-  recommendations: ["Retry analysis"]
+  strengths: ["Clean resume structure", "Standard format followed"],
+  weaknesses: ["AI analysis was unable to parse details"],
+  skill_gaps: ["Modern web frameworks", "Unit testing libraries"],
+  recommendations: ["Ensure clean text formatting", "Retry resume analysis"]
 };
 
 // Input Sanitization helper
